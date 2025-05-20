@@ -1,0 +1,26 @@
+services:
+  sistemas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devsistemasdiario
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.devsistemasdiario.rule=Host(`devsistemas.diariodaregiao.com.br`)
+      - traefik.http.routers.devsistemasdiario.entrypoints=web
+      - traefik.http.routers.devsistemasdiario.tls=false
+    volumes:
+      - ./public:/var/www/html
+      - ./scripts:/srv
+      - ./config/apache:/etc/apache2/sites-enabled
+      - ./config/php:/usr/local/etc/php/php.ini
+      - ./config/ssl:/etc/ssl
+    restart: always
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      - devdiario 
+
+networks:
+  devdiario: 
+    external: true
