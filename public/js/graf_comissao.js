@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('footer').style.display = 'block';
   };
 
-  // window.onafterprint = function () {
-  //   document.getElementById('header').style.display = 'block';
-  //   document.getElementById('footer').style.display = 'block';
-  // };
+  window.onafterprint = function () {
+    document.getElementById('header').style.display = 'block';
+    document.getElementById('footer').style.display = 'block';
+  };
 
   // Torna os campos DtInicial e DtFinal obrigatórios ao clicar no botão Buscar
   const BuscarButton = document.getElementById('btn-buscar');

@@ -4,7 +4,7 @@
     <a href="grafica/GrafCheckMetasEmbProd.php" class="btn btn-primary btn-sm" style="color: white;">Check Metas Gráfica/Embalagem</a>
     <div class="mb-3"></div>
     <a href="grafica/GrafComissao.php" class="btn btn-primary btn-sm" style="color: white;">Comissão Gráfica - Recebimento</a>
-    <!-- <a href="grafica/GrafComissaoNota.php" class="btn btn-primary btn-sm" style="color: white;">Comissão Gráfica - Nota</a> -->
+    <a href="grafica/GrafComissaoNota.php" class="btn btn-primary btn-sm" style="color: white;">Comissão Gráfica - Nota</a>
     <div class="mb-3"></div>
     <!-- <a href="grafica/GrafFaturamento.php" class="btn btn-primary btn-sm" style="color: white;">Faturamento Gráfica</a> -->
     <!-- <a href="grafica/GrafFaturamentoAnual.php" class="btn btn-primary btn-sm" style="color: white;">Faturamento Gráfica Anual/Resumo</a> -->

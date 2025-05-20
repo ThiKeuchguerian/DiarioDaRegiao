@@ -1,14 +1,14 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../classes/Functions/GrafComissao.php';
+require_once __DIR__ . '/../classes/Functions/GrafComissaoNota.php';
 
-$Titulo = 'Comissões - Vendas Serviços Gráficos';
-$URL = URL_PRINCIPAL . 'grafica/GrafComissao.php';
+$Titulo = 'Comissões/Nota - Vendas Serviços Gráficos';
+$URL = URL_PRINCIPAL . 'grafica/GrafComissaoNota.php';
 
 // Instanciar a classe
-$GraficaComissao = new GraficaComissao();
+$GraficaComissaoNota = new GraficaComissaoNota();
 
-$consultaVendedor = $GraficaComissao->consultaVendedor();
+$consultaVendedor = $GraficaComissaoNota->consultaVendedor();
 
 if (isset($_POST['btn-buscar'])) {
   $dtInicio = $_POST['DtInicial'];
@@ -18,7 +18,7 @@ if (isset($_POST['btn-buscar'])) {
   // var_dump($dtInicio, $dtFim, $codVen);
   // die();
 
-  $consultaAnalitico = $GraficaComissao->consultaComissao($dtInicio, $dtFim, $codVen);
+  $consultaAnalitico = $GraficaComissaoNota->consultaComissao($dtInicio, $dtFim, $codVen);
   $Analitico = COUNT($consultaAnalitico);
 
   // echo "<pre>";
@@ -35,9 +35,10 @@ if (isset($_POST['btn-buscar'])) {
     // inicializa o grupo se não existir
     if (!isset($dadosAgrupados[$vendedor])) {
       $dadosAgrupados[$vendedor] = [
-        'Itens'                 => [],
+        'Itens'                  => [],
         'TotalVendasPorVendedor' => 0,
-        'SomaComissao'          => 0.0
+        'SomaComissao'           => 0.0,
+        'SomaNota'               => 0.0
       ];
     }
 
@@ -49,6 +50,7 @@ if (isset($_POST['btn-buscar'])) {
 
     // soma a comissão (converte vírgula para ponto antes)
     $dadosAgrupados[$vendedor]['SomaComissao'] += $item['VlrComis'];
+    $dadosAgrupados[$vendedor]['SomaNota']     += $item['VlrNF'];
     ksort($dadosAgrupados, SORT_NATURAL | SORT_FLAG_CASE);
     $totalComissaoGeral = array_sum(array_column($dadosAgrupados, 'SomaComissao'));
   }
@@ -128,7 +130,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php foreach ($dadosAgrupados as $Vendedor => $dadosVendedor): ?>
                   <tr>
                     <td><?= $Vendedor ?></td>
-                    <td style="text-align: right;"><span style="float: left;">R$</span> <?= number_format($dadosVendedor['SomaComissao'], 2, ',', '.') ?></td>
+                    <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($dadosVendedor['SomaComissao'], 2, ',', '.') ?></td>
                   </tr>
                 <?php endforeach; ?>
               </tbody>
@@ -152,22 +154,23 @@ require_once __DIR__ . '/../includes/header.php';
           <h5 class="card-header bg-primary text-white">
             Vendedor: <?= $Vendedor ?> <br>
             Qtde. Total: <?= $dadosVendedor['TotalVendasPorVendedor'] ?> ||
+            Valor Total NF: <?= number_format($dadosVendedor['SomaNota'], 2, ',', '.') ?> ||
             Comissão Total R$ <?= number_format($dadosVendedor['SomaComissao'], 2, ',', '.') ?>
           </h5>
           <table id="Comissao" name="Comissao" class="table table-striped full-width-table mb-0">
             <thead>
               <tr>
                 <th>Cliente</th>
+                <th>Num. Ped.</th>
+                <th>Num. Orc.</th>
+                <th>Dt. Emissão</th>
                 <th>Nota</th>
                 <th>Tipo Nota</th>
-                <th>Num. Título</th>
-                <th>Venc. Parcela</th>
-                <th>Dt. Pagto.</th>
-                <th>%Agen</th>
-                <th>%Vend</th>
-                <th>Vlr. Parc.</th>
-                <th>Vlr. Pago</th>
-                <th>Vlr. Comissão</th>
+                <th>Vlr. Nota</th>
+                <th>% Agen</th>
+                <th>Vlr. Com. Ag</th>
+                <th>% Vend</th>
+                <th>Vlr. Com. Ven</th>
               </tr>
             </thead>
             <tbody>
@@ -175,26 +178,28 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php if (is_array($item)): ?>
                   <tr>
                     <td><?= $item['Cliente'] ?></td>
-                    <td style="white-space: nowrap;"><?= $item['Nota'] ?></td>
+                    <td style="text-align: center;"><?= $item['NumPedido'] ?></td>
+                    <td ><?= $item['NumPedOrc'] ?></td>
+                    <td><?= date('d/m/Y', strtotime($item['DtNF'])) ?></td>
+                    <td><?= $item['NumNota'] ?></td>
                     <td><?= $item['TipoNota'] ?></td>
-                    <td><?= $item['NumTitulo'] ?></td>
-                    <td><?= date('d/m/Y', strtotime($item['DtVencParc'])) ?></td>
-                    <td><?= date('d/m/Y', strtotime($item['DtPagto'])) ?></td>
-                    <td><?= number_format($item['PerComisAgencia'], 2, ',', '.') ?></td>
-                    <td><?= number_format($item['PerComisVend'], 2, ',', '.') ?></td>
-                    <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($item['VlrParc'], 2, ',', '.') ?></td>
-                    <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($item['VlrPago'], 2, ',', '.') ?></td>
-                    <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($item['VlrComis'], 2, ',', '.') ?></td>
+                    <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($item['VlrNF'], 2, ',', '.') ?></td>
+                    <td style="text-align: center;"><?= number_format($item['PerComisAgencia'], 2, ',', '.') ?></td>
+                    <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($item['VlrComisAg'], 2, ',', '.') ?></td>
+                    <td style="text-align: center;"><?= number_format($item['PerComisVend'], 2, ',', '.') ?></td>
+                    <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($item['VlrComis'], 2, ',', '.') ?></td>
                   </tr>
                 <?php endif; ?>
               <?php endforeach; ?>
             </tbody>
             <tbody>
               <tr class="table-primary">
-                <th colspan="6" style="text-align: left; font-weight: bold;"></th>
+                <th colspan="3" style="text-align: left; font-weight: bold;"></th>
                 <th style="text-align: left; font-weight: bold;"> Qtde. Total </th>
                 <th style="text-align: left; font-weight: bold;"><?= $dadosVendedor['TotalVendasPorVendedor'] ?></th>
-                <th colspan="2" style="text-align: right; font-weight: bold;"> Valor Total Comissão </th>
+                <th style="text-align: left; font-weight: bold;"> Valor Total NF: </th>
+                <th style="text-align: right; font-weight: bold;"><span style="float: left;">R$</span><?= number_format($dadosVendedor['SomaNota'], 2, ',', '.'); ?></th>
+                <th colspan="3" style="text-align: right; font-weight: bold;"> Valor Total Comissão </th>
                 <th style="text-align: right; font-weight: bold;"><span style="float: left;">R$</span><?= number_format($dadosVendedor['SomaComissao'], 2, ',', '.') ?></th>
               </tr>
             </tbody>
