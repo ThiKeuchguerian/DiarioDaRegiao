@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn-buscar'])) {
     $DtSelecionada = date('Y-m-d', strtotime($DtSelecionada));
   }
 
-  $resultado = $CirListagemEntrega->ConsultaListagemEntregra($DtSelecionada, $setorSelecionado);
+  $resultado = $DisListagemEntrega->ConsultaListagemEntregra($DtSelecionada, $setorSelecionado);
   $totalQtde = count($resultado);
   if (empty($setorSelecionado)) {
     $SetorSelec = 'Todos';

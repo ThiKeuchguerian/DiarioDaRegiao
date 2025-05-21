@@ -25,7 +25,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="containers d-flex justify-content-center">
   <div class="col col-sm-6">
     <div class="card shadow-sm">
-      <form action=<?= $URL ?> method="post" id="CheckMetas" name="CheckMetas">
+      <form action=<?= $URL ?> method="post" id="form" name="form">
         <div class="card-header bg-primary text-white">
           <div class="row">
             <div class="col">
