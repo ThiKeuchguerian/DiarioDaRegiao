@@ -11,7 +11,7 @@ $URL = URL_PRINCIPAL . 'ti/ConsultCliWebServiceERP.php';
 // Declarando Variáveis;
 
 // URL do WSDL
-$wsdl = 'http://10.64.0.89:8080/g5-senior-services/sapiens_Synccom_senior_g5_co_cad_clientes?wsdl';
+$wsdl = 'http://10.64.0.89:8080/g5-senior-services/sapiens_Synccom_senior_g5_co_ger_cad_clientes?wsdl';
 
 
 if (isset($_POST['btn-buscar'])) {
@@ -42,7 +42,7 @@ if (isset($_POST['btn-buscar'])) {
     'flowName'             => '',
     'identificadorSistema' => 'CADENA',
     'indicePagina'         => 1,
-    'limitePagina'         => 50,     // quantos registros por página
+    'limitePagina'         => 1,     // quantos registros por página
 
     // struct clientesConsultarCadastroInSigUfs { string sigUfs; }
     'sigUfs' => [
@@ -75,13 +75,13 @@ if (isset($_POST['btn-buscar'])) {
       $paramsIn       // parâmetros do tipo clientesConsultarCadastroIn
     );
 
-    echo '<h3>Resultado:</h3><pre>';
-    print_r($response);
-    echo '</pre>';
+    // echo '<h3>Resultado:</h3><pre>';
+    // print_r($response);
+    // echo '</pre>';
   } catch (SoapFault $e) {
-    echo '<h3>Erro:</h3><pre>';
-    print_r($e);
-    echo '</pre>';
+    // echo '<h3>Erro:</h3><pre>';
+    // print_r($e);
+    // echo '</pre>';
   }
 }
 
@@ -127,6 +127,27 @@ require_once __DIR__ . '/../includes/header.php';
   </div>
 </div>
 
+<div class="mb-3"></div>
+
+<div class="container">
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <?php
+      if (isset($response)) {
+        echo '<h3>Resultado:</h3><pre>';
+        print_r($response);
+        echo '</pre>';
+      } else {
+        echo '<h3>Erro:</h3><pre>';
+        print_r($e);
+        echo '</pre>';
+      }
+
+      ?>
+    </div>
+  </div>
+</div>
 <!-- Espaço entre o menu e o resultado -->
 <div class="mb-3"></div>
 

@@ -5,6 +5,7 @@
     <a href="circulacao/CirVendasEquipe.php" class="btn btn-primary btn-sm" style="color: white;"> Acompanhamento de Vendas/Equipe </a>
     <a href="circulacao/CirAnaliseCancEnc.php" class="btn btn-primary btn-sm" style="color: white;"> Analise Cancelamento </a>
     <div class="mb-3"></div>
+    <a href="circulacao/CirConRecCidade.php" class="btn btn-primary btn-sm" style="color: white;"> Contratos Recebidos Cidade </a>
     <!-- <a href="RelCanEnc.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Contratos Can/Enc </a> -->
     <!-- <a href="RelCanEncSetor.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Can/Enc Setor </a> -->
     <div class="mb-3"></div>

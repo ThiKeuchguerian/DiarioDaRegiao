@@ -44,22 +44,6 @@ class ClassifCheckMetas
       CROSS APPLY ( SELECT COUNT(*) AS TotalDatas FROM contratos_datas x WHERE x.nroContrato = con.nroContrato ) t 
   ";
 
-  private $queryCaptDia = "SELECT cli.nomeFantasia COLLATE Latin1_General_CI_AI AS Cliente, con.nroContrato AS CodAnuncio, dtcon.dataVeiculacao AS DtPublicacao, 
-      con.dataEmissao AS DtCapitacao, FORMAT(dtcon.dataVeiculacao, 'MM/yyyy') AS MesPub, (con.valor / t.TotalDatas) AS VlrPub, NULL AS CodVendCont,
-      'Capt' COLLATE Latin1_General_CI_AI AS Origem, '' COLLATE Latin1_General_CI_AI AS SL, CONVERT(VARCHAR,con.formaPgto) AS Cobranca,
-      con.idUsuCadastro AS QuemCaptou, con.idUsuAlteracao AS Alterou, '' COLLATE Latin1_General_CI_AI AS CapComi, '' COLLATE Latin1_General_CI_AI AS NumContrato,
-      CASE 
-        WHEN con.codVendedor = 578 THEN 'Silvania'
-        WHEN con.codVendedor = 651 THEN 'Rosana'
-        WHEN con.codVendedor = 1436 THEN 'Carolini'
-      END AS VendContrato
-    FROM contratos con
-      INNER JOIN contratos_datas dtcon WITH (noLock) ON con.nroContrato = dtcon.nroContrato
-      INNER JOIN vendedores ven WITH (noLock) ON con.codVendedor = ven.codVendedor
-      INNER JOIN clientes cli WITH (noLock) ON con.cpfCnpj = cli.cpfCnpj
-      CROSS APPLY ( SELECT COUNT(*) AS TotalDatas FROM contratos_datas x WHERE x.nroContrato = con.nroContrato ) t 
-  ";
-
   private $ajustandoNomeVendedor = "AjustandoNomeVendedor AS (	
     Select CodAnuncio, Cliente, DtCapitacao, DtPublicacao, MesPub, VlrPub, SL, Origem, Cobranca, QuemCaptou, CapComi, NumContrato, CodVendCont, 
       CASE 
