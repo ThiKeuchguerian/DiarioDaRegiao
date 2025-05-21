@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/suporte/devsistemasdiario/
+cd ../
 
 # Junta todos os argumentos passados como uma única string
 COMMIT_MSG="$*"
