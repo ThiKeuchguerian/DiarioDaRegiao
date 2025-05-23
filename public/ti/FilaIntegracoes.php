@@ -577,7 +577,7 @@ require_once __DIR__ . '/../includes/header.php';
 <?php require_once __DIR__ . '/../includes/modals/fila_integracoes.php'; ?>
 
 <!-- Inclui JavaScript -->
-<script src="<?= URL_PRINCIPAL ?>js/filaintegracao.js"></script>
+<script src="<?= URL_PRINCIPAL ?>js/ti_filaintegracao.js"></script>
 
 <!-- Inclui o footer da página -->
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

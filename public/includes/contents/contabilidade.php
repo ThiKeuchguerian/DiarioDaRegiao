@@ -8,6 +8,7 @@
     <a href="contabil/ContRazao.php" class="btn btn-primary btn-sm" style="color: white;">Razão Contábeil</a>
     <div class="mb-3"></div>
     <a href="contabil/ContConfereLote.php" class="btn btn-primary btn-sm" style="color: white;">Conferencia Lotes Contábeis</a>
+    <a href="contabil/ContConfereLoteOri.php" class="btn btn-primary btn-sm" style="color: white;">Conferencia Lotes Contábeis - Origem</a>
     <div class="mb-3"></div>
     <a href="contabil/ContVerNFEntrada.php" class="btn btn-primary btn-sm" style="color: white;">Verifica Retenção NF Entrada</a>
   </div>

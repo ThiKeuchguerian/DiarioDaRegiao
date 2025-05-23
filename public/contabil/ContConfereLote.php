@@ -8,15 +8,16 @@ $URL = URL_PRINCIPAL . 'contabil/ContConfereLote.php';
 // Instanciar a classe
 $ConsultaLoteContabil = new LoteContabil();
 
-// Busca Origem para filtro
-$ConsultaOrigem = $ConsultaLoteContabil->consultaOrigem();
-
 if (isset($_POST['btn-buscar'])) {
   $codEmpresa = $_POST['CodEmp'];
   $mesAno     = $_POST['MesAno'];
-  $origem     = $_POST['Origem'];
 
-  $ConsultaLote = $ConsultaLoteContabil->consultaLoteContabil($codEmpresa, $mesAno, $origem);
+  // echo "<pre>";
+  // var_dump($codEmpresa, $mesAno);
+  // die();
+
+  $ConsultaLote = $ConsultaLoteContabil->consultaLoteContabil($codEmpresa, $mesAno);
+  $Total = 0;
   $Total = COUNT($ConsultaLote);
 
   // echo "<pre>";
@@ -24,22 +25,53 @@ if (isset($_POST['btn-buscar'])) {
   // die();
 
   if ($Total > 0) {
-    //  Extrai Numero de Lotes
-    $numLotValues = array_column($ConsultaLote, 'NUMLOT');
+    $ConsultaLancamento = $ConsultaLoteContabil->consultaLancamentoLoteContabil($codEmpresa, $mesAno);
+    $TotalLan = 0;
+    $TotalLan = COUNT($ConsultaLancamento);
 
-    // echo "<pre>";
-    // var_dump($numLotValues);
-    // die();
-    $ConsultaLancamento = $ConsultaLoteContabil->consultaLancamentoLoteContabil($numLotValues);
+    // Agrupando por Num lote
+    $agrupaLote = [];
+    foreach ($ConsultaLancamento as $item) {
+      $data  = $item['DATLCT'];
+      $valor = (float) str_replace(',', '.', $item['VLRLCT']);
+
+      // inicializa o grupo se necessário
+      if (!isset($agrupaLote[$data])) {
+        $agrupaLote[$data] = [
+          'itens'   => [],
+          'debito'  => 0.0,
+          'credito' => 0.0,
+          'dif'     => 0.0,
+        ];
+      }
+
+      // adiciona ao array de itens
+      $agrupaLote[$data]['itens'][] = $item;
+
+      // soma débito ou crédito
+      if ($item['CTADEB'] > 0) {
+        $agrupaLote[$data]['debito'] += $valor;
+      }
+      if ($item['CTACRE'] > 0) {
+        $agrupaLote[$data]['credito'] += $valor;
+      }
+    }
+    // Calcula a diferença para cada lote
+    foreach ($agrupaLote as $data => &$grupo) {
+      $dif = $grupo['credito'] - $grupo['debito'];
+      $grupo['dif'] = round($dif, 2);
+    }
+    unset($grupo);
   }
 }
+
 // Inclui o header da página
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Menu de navegação -->
 <div class="containers d-flex justify-content-center">
-  <div class="col col-sm-8">
+  <div class="col col-sm-6">
     <div class="card shadow-sm">
       <form action=<?= $URL ?> method="post" id="form" name="form">
         <div class="card-header bg-primary text-white">
@@ -49,9 +81,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="col">
               <strong>Mes/Ano</strong>
-            </div>
-            <div class="col">
-              <strong>Origem</strong>
             </div>
           </div>
         </div>
@@ -66,16 +95,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="col">
               <input type="text" class="form-control form-control-sm" id="MesAno" name="MesAno" placeholder="MM/YYYY">
-            </div>
-            <div class="col">
-              <select class="form-select form-select-sm" name="Origem" required>
-                <option value="Todos" disabled selected>-- Selecione --</option>
-                <?php foreach ($ConsultaOrigem as $origem): ?>
-                  <option value="<?= htmlspecialchars($origem['ORILCT']) ?>">
-                    <?= htmlspecialchars($origem['ORILCT']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
             </div>
           </div>
         </div>
@@ -96,164 +115,133 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Exibindo Resultado -->
 <?php if (!empty($Total)): ?>
   <div class="container">
-    <div class="card shadow-sm ">
-      <h5 class="card-header bg-primary text-white">Consulta Nota Saída</h5>
+    <div class="card shadow-sm">
+      <h5 class="card-header bg-primary text-white">Consulta Lote: <?= $mesAno ?></h5>
       <div class="card-body table-responsive">
-        <table id="NotaSaida" class="table table-striped full-width-table">
+        <table id="NotaSaida" class="table table-striped full-width-table mb-0">
           <thead>
             <tr class="table-primary">
-              <th>N.º Lote</th>
               <th>Situação</th>
-              <th>Data</th>
-              <th>Vlr. Créditos</th>
-              <th>Vlr. Débitos</th>
-              <th>Vlr. Diferença</th>
-              <th>Vlr. Total</th>
-              <th>Origem</th>
-              <th>Status</th>
+              <th style="text-align: center;">Data</th>
+              <th style="text-align: center;">Vlr. Créditos</th>
+              <th style="text-align: center;">Vlr. Débitos</th>
+              <th style="text-align: center;">Vlr. Diferença</th>
+              <th style="text-align: center;">Vlr. Total</th>
+              <th style="text-align: center;">Status</th>
             </tr>
           </thead>
           <tbody>
             <?php foreach ($ConsultaLote as $key => $item) : ?>
               <tr>
-                <td><?= $item['NUMLOT'] ?></td>
                 <th><?= $item['SITLOT'] ?></th>
-                <td><?= date('d/m/Y', strtotime($item['DATLOT'])) ?></td>
-                <td style="text-align: right;"><span style="float: left;">R$ </span><?= number_format($item['TOTCRELCT'], 2, ',', '.') ?></td>
-                <td style="text-align: right;"><span style="float: left;">R$ </span><?= number_format($item['TOTDEBLCT'], 2, ',', '.') ?></td>
-                <td style="text-align: right; font-weight: <?= (($item['TOTCRELCT'] - $item['TOTDEBLCT'] > 0) || $item['TOTCRELCT'] - $item['TOTDEBLCT'] < 0) ? 'bold' : 'normal' ?>; color: <?= (($item['TOTCRELCT'] - $item['TOTDEBLCT'] > 0) || $item['TOTCRELCT'] - $item['TOTDEBLCT'] < 0) ? 'red' : 'black' ?>;">
-                  <span style="float: left;">R$ </span><?= number_format($item['TOTCRELCT'] - $item['TOTDEBLCT'], 2, ',', '.') ?>
+                <td style="text-align: center;"><?= date('d/m/Y', strtotime($item['DATLOT'])) ?></td>
+                <td style="text-align: right;"><span style="float: left;">R$ </span><?= number_format($item['TOTCRE'], 2, ',', '.') ?></td>
+                <td style="text-align: right;"><span style="float: left;">R$ </span><?= number_format($item['TOTDEB'], 2, ',', '.') ?></td>
+                <td style="text-align: right; font-weight: <?= ($item['DIF'] != 0) ? 'bold' : 'normal' ?>; color: <?= ($item['DIF'] != 0) ? 'red' : 'black' ?>;">
+                  <span style="float: left;">R$ </span><?= number_format($item['DIF'], 2, ',', '.') ?>
                 </td>
                 <td style="text-align: right;"><span style="float: left;">R$ </span><?= number_format($item['TOTINF'], 2, ',', '.') ?></td>
-                <td><?= $item['ORILCT'] ?></td>
-                <td class="align-center" style="font-weight: bold; color: <?= (($item['TOTCRELCT'] - $item['TOTDEBLCT'] > 0) || $item['TOTCRELCT'] - $item['TOTDEBLCT'] < 0) ? 'red' : 'blue' ?>; text-align: center;"><?= (($item['TOTCRELCT'] - $item['TOTDEBLCT'] > 0) || $item['TOTCRELCT'] - $item['TOTDEBLCT'] < 0) ? 'X' : 'OK' ?></td>
+                <td class="align-center" style="font-weight: bold; color: <?= (($item['TOTCRE'] - $item['TOTDEB'] > 0) || $item['TOTCRE'] - $item['TOTDEB'] < 0) ? 'red' : 'blue' ?>; text-align: center;"><?= (($item['TOTCRE'] - $item['TOTDEB'] > 0) || $item['TOTCRE'] - $item['TOTDEB'] < 0) ? 'XX' : 'OK' ?></td>
               </tr>
             <?php endforeach; ?>
           </tbody>
-          <tbody>
+          <tfoot>
             <tr class="table-primary">
-              <th colspan=3 style="text-align: right;">Total Geral:</th>
-              <th style="text-align: right;"><span style="float: left;">R$ </span><?= number_format(array_sum(array_column($ConsultaLote, 'TOTCRELCT')), 2, ',', '.') ?></th>
-              <th style="text-align: right;"><span style="float: left;">R$ </span><?= number_format(array_sum(array_column($ConsultaLote, 'TOTDEBLCT')), 2, ',', '.') ?></th>
-              <th style="text-align: right;"><span style="float: left;">R$ </span><?= number_format(array_sum(array_column($ConsultaLote, 'TOTCRELCT')) - array_sum(array_column($ConsultaLote, 'TOTDEBLCT')), 2, ',', '.') ?></th>
+              <th colspan=2 style="text-align: right;">Total Geral:</th>
+              <th style="text-align: right;"><span style="float: left;">R$ </span><?= number_format(array_sum(array_column($ConsultaLote, 'TOTCRE')), 2, ',', '.') ?></th>
+              <th style="text-align: right;"><span style="float: left;">R$ </span><?= number_format(array_sum(array_column($ConsultaLote, 'TOTDEB')), 2, ',', '.') ?></th>
+              <th style="text-align: right; font-weight: <?= (array_sum(array_column($ConsultaLote, 'DIF')) > 0 || array_sum(array_column($ConsultaLote, 'DIF')) < 0) ? 'bold' : 'normal' ?>; color: <?= (array_sum(array_column($ConsultaLote, 'DIF')) > 0 || array_sum(array_column($ConsultaLote, 'DIF')) < 0) ? 'red' : 'black' ?>;">
+                <span style="float: left;">R$ </span><?= number_format(array_sum(array_column($ConsultaLote, 'DIF')), 2, ',', '.') ?>
+              </th>
               <th style="text-align: right;"><span style="float: left;">R$ </span><?= number_format(array_sum(array_column($ConsultaLote, 'TOTINF')), 2, ',', '.') ?></th>
               <th colspan="9" style="text-align: right;"></th>
             </tr>
-          </tbody>
+          </tfoot>
         </table>
       </div>
     </div>
   </div>
+<?php endif; ?>
 
-  <!-- Espacamento -->
-  <div class="mb-3"></div>
+<!-- Espacamento -->
+<div class="mb-3"></div>
 
-  <!-- Exibindo Resultado Lançamentos -->
-  <?php if (!empty($ConsultaLancamento)) : ?>
-    <?php
-    // Agrupa os lançamentos por data
-    $lancamentosPorData = [];
-    foreach ($ConsultaLancamento as $lancamento) {
-      $data = $lancamento['DATLCT'];
-      $lancamentosPorData[$data][] = $lancamento;
-    }
-
-    foreach ($lancamentosPorData as $data => $lancamentos) {
-      // Calcula os totais para cada data
-      $totalDebito  = 0;
-      $totalCredito = 0;
-      foreach ($lancamentos as $item) {
-        if ($item['CTADEB'] > 0) {
-          $totalDebito += $item['VLRLCT'];
+<!-- Exibindo Resultado Lançamentos -->
+<?php if (!empty($TotalLan)) : ?>
+  <div class="container">
+    <?php foreach ($agrupaLote as $data => $dados): ?>
+      <?php if ($dados['dif'] != 0):
+        // Agrupar itens por NUMFTC
+        $grupos = [];
+        foreach ($dados['itens'] as $item) {
+          $chave = $item['NUMFTC'] ?: $item['CPLLCT'];
+          $grupos[$chave][] = $item;
         }
-        if ($item['CTACRE'] > 0) {
-          $totalCredito += $item['VLRLCT'];
-        }
-      }
-      // Formata os totais
-      $diferenca    = number_format($totalCredito - $totalDebito, 2, ',', '.');
-      $totalDebito  = number_format($totalDebito, 2, ',', '.');
-      $totalCredito = number_format($totalCredito, 2, ',', '.');
-    }
-    ?>
-    <?php if ($diferenca > 0 || $diferenca < 0): ?>
-      <div class="container">
+      ?>
         <div class="card shadow-sm ">
-          <h5 class="card-header bg-primary text-white">Consulta Nota Saída</h5>
-          <div class="card-body table-responsive">
-            <table id="Lancamentos" class="table table-striped full-width-table">
+          <h6 class="card-header bg-primary text-white toggle-header">
+            Lançamento - <?= date('d/m/Y', strtotime($data)) ?> ||
+            Total Débito - R$ <?= number_format($dados['debito'], 2, ',', '.') ?> ||
+            Total Crédito - R$ <?= number_format($dados['credito'], 2, ',', '.') ?> ||
+            Diferença - R$ <?= number_format($dados['dif'], 2, ',', '.') ?>
+          </h6>
+          <div class="card-body table-responsive" >
+            <table class="table table-striped full-width-table mb-0" style="cursor: pointer;">
               <thead>
-                <tr class="table-primary toggle-summary gray-background" style="cursor: pointer;">
-                  <th colspan="2" style="text-align: left;">Total Lançamento - <?= date('d/m/Y', strtotime($data)) ?></th>
-                  <th style="text-align: right;"><span style="float: left;">Total Débito - R$ </span><?= $totalDebito ?></th>
-                  <th style="text-align: right;"><span style="float: left;">Total Crédito - R$ </span><?= $totalCredito ?></th>
-                  <th colspan="2" style="text-align: center;"><span style="float: left;">Diferença - R$ </span><?= $diferenca ?></th>
-                  <th colspan="2" style="text-align: center;">Clique para ver detalhes</th>
+                <tr class="table-primary gray-background">
+                  <th>Nº. Lanc.</th>
+                  <th>Dt. Lanc.</th>
+                  <th>Conta Debi.</th>
+                  <th>Conta Cred.</th>
+                  <th>Vlr. Lanc.</th>
+                  <th>Origem</th>
+                  <th>Nº. Lote</th>
+                  <th>Nº.</th>
+                  <th>Complemento</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <!-- Corpo com os detalhes; inicialmente oculto -->
-              <tbody class="toggle-details" style="display: none;">
-                <?php
-                // Agrupa os lançamentos do dia pelo campo CPLLCT
-                $lancamentosPorComplemento = [];
-                foreach ($lancamentos as $item) {
-                  // Use o valor do campo para agrupar; se estiver vazio, pode definir um rótulo padrão.
-                  $complemento = $item['CPLLCT'] ?: 'Sem Complemento';
-                  $lancamentosPorComplemento[$complemento][] = $item;
-                }
-
-                // Itera sobre cada grupo
-                foreach ($lancamentosPorComplemento as $complemento => $itens):
-                  // Calcula os totais para cada data
-                  $totalDebito1  = 0;
-                  $totalCredito1 = 0;
-                  foreach ($itens as $item) {
+              <tbody class="toggle-details">
+                <?php foreach ($grupos as $numFtc => $itensGrupo):
+                  $totalDebito  = 0;
+                  $totalCredito = 0;
+                  foreach ($itensGrupo as $item) {
                     if ($item['CTADEB'] > 0) {
-                      $totalDebito1 += $item['VLRLCT'];
+                      $totalDebito += (float) str_replace(',', '.', $item['VLRLCT']);
                     }
                     if ($item['CTACRE'] > 0) {
-                      $totalCredito1 += $item['VLRLCT'];
+                      $totalCredito += (float) str_replace(',', '.', $item['VLRLCT']);
                     }
                   }
-                  // Formata os totais
-                  $diferenca1    = number_format($totalCredito1 - $totalDebito1, 2, ',', '.');
-                  $totalDebito1  = number_format($totalDebito1, 2, ',', '.');
-                  $totalCredito1 = number_format($totalCredito1, 2, ',', '.');
+                  $diferenca = round($totalCredito - $totalDebito, 2);
+                  $status = ($diferenca == 0) ? 'OK' : 'XX';
+                  if ($diferenca != 0):
                 ?>
-                  <?php if ($diferenca1 > 0 || $diferenca1 < 0) : ?>
-                    <!-- Linha para identificar o grupo por CPLLCT -->
-                    <tr style="background: #e9ecef; font-weight: bold;">
-                      <td colspan="8">Complemento: <?= $complemento ?></td>
+                  <?php foreach ($itensGrupo as $item): ?>
+                    <tr>
+                      <td><?= $item['NUMLCT'] ?></td>
+                      <td><?= date('d/m/Y', strtotime($item['DATLCT'])) ?></td>
+                      <td><?= $item['CTADEB'] ?></td>
+                      <td><?= $item['CTACRE'] ?></td>
+                      <td style="text-align:right"><span style="float: left;">R$</span><?= number_format((float) str_replace(',', '.', $item['VLRLCT']), 2, ',', '.') ?></td>
+                      <td><?= $item['ORILCT'] ?></td>
+                      <td><?= $item['NUMLOT'] ?></td>
+                      <td><?= $item['NUMFTC'] ?></td>
+                      <td><?= $item['CPLLCT'] ?></td>
+                      <td style="font-weight: bold; color: <?= ($status === 'OK') ? 'blue' : 'red' ?>; text-align: center;"><?= $status ?></td>
                     </tr>
-                    <?php foreach ($itens as $item): ?>
-                      <tr>
-                        <td><?= $item['NUMLCT'] ?></td>
-                        <td><?= date('d/m/Y', strtotime($item['DATLCT'])) ?></td>
-                        <td><?= $item['CTADEB'] ?></td>
-                        <td><?= $item['CTACRE'] ?></td>
-                        <td style="text-align: right;">
-                          <span style="float: left;">R$ </span><?= number_format($item['VLRLCT'], 2, ',', '.') ?>
-                        </td>
-                        <td><?= $item['ORILCT'] ?></td>
-                        <td colspan="2"><?= $item['CPLLCT'] ?></td>
-                      </tr>
-                    <?php endforeach; ?>
-                    <!-- Linha de totalização por CPLLCT -->
-                    <tr style="background: #f5f5f5; font-weight: bold;">
-                      <td colspan="2" style="text-align: right;">Total:</td>
-                      <td style="text-align: right;"><span style="float: left;">R$ </span><?= $totalDebito1 ?></td>
-                      <td style="text-align: right;"><span style="float: left;">R$ </span><?= $totalCredito1 ?></td>
-                      <td colspan="3" style="text-align: center;"><span style="float: left;">Diferença - R$ </span><?= $diferenca1 ?></td>
-                    </tr>
-                  <?php endif; ?>
-                <?php endforeach; ?>
+                  <?php endforeach; ?>
+                <?php
+                  endif;
+                endforeach; ?>
               </tbody>
             </table>
           </div>
         </div>
-      </div>
-    <?php endif; ?>
-  <?php endif; ?>
+        <div class="mb-2"></div>
+      <?php endif; ?>
+    <?php endforeach; ?>
+  </div>
 <?php endif; ?>
 
 <!-- Inclui o JavaScript -->

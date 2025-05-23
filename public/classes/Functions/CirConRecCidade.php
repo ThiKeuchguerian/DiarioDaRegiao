@@ -22,7 +22,7 @@ class CirContratosRecebidos
         P.nomeRazaoSocial AS NomeRazaoSocial,
         E.nomeDoMunicipio AS Cidade, E.siglaDaUf AS UF, 
         C.numeroDoContrato AS Contrato, 
-        CASE WHEN C.situacaoDoContrato = 1 THEN 'SIM' ELSE 'NÃO' END AS ContratoAtivo, 
+        CASE WHEN C.situacaoDoContrato = 1 THEN 'Ativo' ELSE 'Inativo' END AS ContratoAtivo, 
         C.dataDaAssinatura AS DataAssinatura, 
         FORMAT(C.dataDaAssinatura, 'yyyy') AS AnaDtAss,
         FORMAT(C.dataDaAssinatura, 'MM') AS MesDtAss,
