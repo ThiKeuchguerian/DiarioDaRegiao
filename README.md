@@ -1,1 +1,3 @@
 # Diario Da Regiao
+
+cd ;;
