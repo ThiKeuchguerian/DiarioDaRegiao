@@ -8,4 +8,4 @@ COMMIT_MSG="$*"
 # # Comandos git
 git add .
 git commit -m "$COMMIT_MSG"
-git push
+git push -u origin main
