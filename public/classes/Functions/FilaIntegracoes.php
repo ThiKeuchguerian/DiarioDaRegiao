@@ -4,18 +4,17 @@ require_once __DIR__ . '/../DBConnect.php';
 class FilaIntegracoes
 {
   private $senior;
-  private $gestor;
   private $totvs;
-  private $capt;
 
   public function __construct()
   {
     $this->senior = DatabaseConnection::getConnection('senior');
-    $this->gestor = DatabaseConnection::getConnection('gestor');
     $this->totvs  = DatabaseConnection::getConnection('totvs');
-    $this->capt   = DatabaseConnection::getConnection('capt');
   }
 
+  // ------------------------------------------------------------------------
+  // SELECTS
+  // ------------------------------------------------------------------------
   //Integração de Cliente
   public function IntegracaoCliente()
   {
@@ -105,5 +104,120 @@ class FilaIntegracoes
     $buscaPedprotheus->execute();
     $dadosPedProtheus = $buscaPedprotheus->fetchAll((PDO::FETCH_ASSOC));
     return $dadosPedProtheus;
+  }
+
+  // ------------------------------------------------------------------------
+  // UPDATES
+  // ------------------------------------------------------------------------
+  /** Método público que recebe o $_POST e dispara o update/delete adequado */
+  public function processPost(array $post): void
+  {
+    // Inicia transação se quiser agrupar updates
+    $this->senior->beginTransaction();
+    $this->totvs->beginTransaction();
+
+    try {
+      // Dispatchates por chave
+      if (!empty($post['EditNumPed'])) {
+        $this->updatePedidoGrafica(
+          $post['EditNumPed'],
+          $post['EditVlrPedido'],
+          $post['EditVlrParc']
+        );
+      }
+
+      if (!empty($post['EditFlProcProtheus'])) {
+        $this->deleteProtheusPedido(
+          $post['EditCodPed'],
+          $post['EditFlProcProtheus'],
+          $post['EditCodCliProtheus']
+        );
+      }
+
+      if (!empty($post['EditAPCapt'])) {
+        $this->updatePedidoCaptura(
+          $post['EditAPCapt'],
+          $post['EditCpfCnpjCapt'],
+          $post['EditCodCliCapt']
+        );
+      }
+
+      if (!empty($post['EditCodigoCliProtheus'])) {
+        $this->updateClienteProtheus(
+          $post['EditCodigoCliProtheus'],
+          $post['EditCpfCnpjProtheus'],
+          $post['EditIEProtheus'],
+          $post['EditFlProcCliProtheus']
+        );
+      }
+
+      if (!empty($post['BtnDeletePedProtheus'])) {
+        $this->deleteProtheusPedido(
+          $post['EditCodPed'],
+          $post['EditFlProcProtheus'],
+          $post['EditCodCliProtheus']
+        );
+      }
+
+      // Se tudo OK, commita
+      $this->senior->commit();
+      $this->totvs->commit();
+    } catch (\Throwable $e) {
+      // Se der erro, desfaz tudo
+      $this->senior->rollBack();
+      $this->totvs->rollBack();
+      throw $e;
+    }
+  }
+
+  private function updatePedidoGrafica(string $numPed, float $vlrPedido, float $vlrParc): void
+  {
+    $sql1 = "UPDATE usu_tszp010 SET usu_zp_valped = ?, usu_zp_parc1 = ? WHERE USU_ZP_NUMORI = ?";
+    $this->senior->prepare($sql1)->execute([$vlrPedido, $vlrParc, $numPed]);
+
+    $sql2 = "UPDATE usu_tszq010 SET usu_zq_prcven = ?, usu_zq_valor = ?, usu_zq_prunit = ? WHERE USU_ZQ_NUMORI = ?";
+    $this->senior->prepare($sql2)->execute([$vlrPedido, $vlrPedido, $vlrPedido, $numPed]);
+  }
+
+  private function deleteProtheusPedido(string $numPed, string $flProc, string $codCli): void
+  {
+    $sql = "DELETE FROM SZQ010 WHERE ZQ_NUMORI = ?";
+    $stmt = $this->totvs->prepare($sql);
+    $stmt->execute([$numPed]);
+
+    $sql = "DELETE FROM SZP010
+            WHERE ZP_NUMORI   = ?
+              AND ZP_FLPROC   = ?
+              AND ZP_CLIENTE  = ?";
+    $this->totvs->prepare($sql)
+      ->execute([$numPed, $flProc, $codCli]);
+  }
+
+  private function updatePedidoCaptura(
+    string $numContrato,
+    string $cpfcnpj,
+    string $codCli
+  ): void {
+    $sql = "UPDATE usu_tpedcapt
+              SET usu_cpfcnpj = ?
+            WHERE usu_numori   = ?
+              AND usu_cliente = ?";
+    $this->senior->prepare($sql)
+      ->execute([$cpfcnpj, $numContrato, $codCli]);
+  }
+
+  private function updateClienteProtheus(
+    string $codCli,
+    string $cpf,
+    string $ie,
+    string $flProc
+  ): void {
+    $sql = "UPDATE SZR010
+                   SET ZR_FLPROC = ?,
+                       ZR_INSCR  = ?
+                 WHERE ZR_COD    = ?
+                   AND ZR_CGC    = ?";
+    $this->totvs->prepare($sql)
+      ->execute([$flProc, $ie, $codCli, $cpf]);
   }
 }
