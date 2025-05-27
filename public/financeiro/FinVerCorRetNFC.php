@@ -3,7 +3,7 @@ session_start();
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../classes/Functions/FinVerCorRetNFC.php';
 
-$Titulo = 'Verifica/Corrigi Retenção de Nota';
+$Titulo = 'Verifica/Corrigi Retenção de Nota NSC';
 $URL = URL_PRINCIPAL . 'financeiro/FinVerCorRetNFC.php';
 
 // Instanciar a classe
