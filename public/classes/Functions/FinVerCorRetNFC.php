@@ -290,12 +290,13 @@ class FinVerificaCorrigeRecencaoNFC
           vlrbct = :VlrBaseCOFINS, 
           percrt = :PercCOFINS, 
           vlrcrt = :VlrCOFINS
-        WHERE codemp = :CodEmpresa AND numnfv = :NNota AND codsnf='NSC'
+        WHERE codemp = :CodEmpresa AND numnfv = :NNota AND seqisv = :SeqIsv AND codsnf='NSC'
       ";
 
       $params = [
         'CodEmpresa'    => $dados['editCodEmp'],
         'NNota'         => $dados['editNumNota'],
+        'SeqIsv'        => $dados['editSeq'],
         'VlrBaseNota'   => $dados['editVlrBaseNota'],
         'VlrBaseIR'     => $dados['editVlrBaseIR'],
         'PercIR'        => $dados['editPercIR'],
