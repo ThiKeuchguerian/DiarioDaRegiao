@@ -68,6 +68,12 @@ class DatabaseConnection
           $pass = 'tecsams';
           break;
 
+        case 'flip':
+          $dsn = "mysql:host=168.138.157.203;port=3317;dbname=websquad;charset=utf8";
+          $user = 'root';
+          $pass = 'P0hRk6aON10f';
+          break;
+          
         default:
           throw new Exception("Conexão '$db' não definida.");
       }
