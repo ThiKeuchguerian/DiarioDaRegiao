@@ -17,19 +17,20 @@ if (isset($_POST['btn-buscar'])) {
   $year = $_POST['ano'];
   $idProd = $_POST['produto'];
 
-  // echo "<pre>";
-  // var_dump($year, $idProd);
-  // die();
   // Obter datas do banco de dados para o ano selecionado
   $datesFromDb = $DatasEdicoesFlip->buscarDatasEdicoes($year, $idProd);
-  // echo "<pre>";
-  // var_dump($datesFromDb);
-  // die();
 
   //Gerar o HTML para o calendário de 12 meses
   $calendarHTML = $DatasEdicoesFlip->gerarMesesDoAno($year, $datesFromDb);
 
   $dados = COUNT($datesFromDb);
+
+  foreach ($buscaProdutos as $prod) {
+    if ($prod['id'] === $idProd) {
+      $nameProd = $prod['name'];
+      break;
+    }
+  }
 }
 // Inclui o header da página
 require_once __DIR__ . '/../includes/header.php';
@@ -81,10 +82,13 @@ require_once __DIR__ . '/../includes/header.php';
 
 <!-- Exibe o calendário do ano selecionado -->
 <?php if (isset($dados)): ?>
-  <div class="container h-100">
-    <div class="card shadow-sm h-100">
-      <div class="card-body d-flex flex-column p-0 h-100">
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+  <div class="container">
+    <div class="card shadow-sm">
+      <h5 class="card-header bg-primary text-white">
+        <?= $dados ?> Edições do <?= $nameProd ?> no Ano <?= $ano ?>
+      </h5>
+      <div class="card-body d-flex flex-column">
+        <div class="row row-cols-0 row-cols-md-3 g-2">
           <?php echo $calendarHTML; ?>
         </div>
       </div>

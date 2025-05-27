@@ -181,9 +181,19 @@
     }
 
     /* Estilos para o calendário */
-    .calendar td {
-      height: 3rem;
+    .calendar td,th {
+      height: 1.5rem;
+      /* Altura menor */
+      width: 1.5rem;
+      /* Largura menor */
       vertical-align: middle;
+      /* Centralização vertical */
+      text-align: center;
+      /* Centralização horizontal */
+      padding: 0;
+      /* Remove espaçamento interno */
+      font-size: 0.65rem;
+      /* Texto menor, opcional */
       cursor: default;
     }
   </style>

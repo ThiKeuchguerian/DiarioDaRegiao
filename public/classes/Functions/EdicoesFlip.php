@@ -90,9 +90,9 @@ class EdicoesFlip
   function gerarMesesDoAno(int $year, array $markedDates): string
   {
     // flip para lookup
+    setlocale(LC_TIME, 'pt_BR.UTF-8'); // para nomes em pt-BR
     $marked = array_flip($markedDates);
     $mesesHTML = '';
-    setlocale(LC_TIME, 'pt_BR.utf8'); // para nomes em pt-BR
 
     for ($m = 1; $m <= 12; $m++) {
       $nomeMes = ucfirst(strftime('%B', mktime(0, 0, 0, $m, 1, $year)));
