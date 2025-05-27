@@ -32,9 +32,9 @@ require_once __DIR__ . '/../includes/header.php';
     ['dsn' => "sqlsrv:Server=10.64.0.36,1433;Database=sapiens_teste;", 'usuario' => 'sapiens_teste', 'senha' => 'sapiensteste'],
     ['dsn' => "sqlsrv:Server=10.64.0.13,1433;Database=EasyClass;", 'usuario' => 'tecmidia', 'senha' => 'tecsams'],
     ['dsn' => "sqlsrv:Server=172.16.0.15,1433;Database=WebTake;", 'usuario' => 'tecmidia', 'senha' => 'tecsams'],
-    ['dsn' => "sqlsrv:Server=10.64.0.25\\SQLEXPRESS;Database=cadena;", 'usuario' => 'capt', 'senha' => 'capt11'],
-    ['dsn' => "sqlsrv:Server=10.64.0.7\\MICROSIGA;Database=PROTHEUS;", 'usuario' => 'totvs', 'senha' => 'totvs']
-
+    ['dsn' => "sqlsrv:Server=10.64.0.25\\SQLEXPRESS;Database=cadena;", 'usuario' => 'capt', 'senha' => 'capt'],
+    ['dsn' => "sqlsrv:Server=10.64.0.7\\MICROSIGA;Database=PROTHEUS;", 'usuario' => 'totvs', 'senha' => 'totvs'],
+    ['dsn' => "mysql:host=168.138.157.203;port=3317;dbname=websquad;charset=utf8", 'usuario' => 'root', 'senha' => 'P0hRk6aON10f']
   ];
 
   // Testar conexões
@@ -46,6 +46,6 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 
-<?php 
+<?php
 
 require_once __DIR__ . '/../includes/footer.php';
