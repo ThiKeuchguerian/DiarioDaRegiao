@@ -76,6 +76,7 @@
     }
 
     @media print {
+
       table,
       tr,
       th,
@@ -177,6 +178,13 @@
     /* Fim do estilo para barra do tempo */
     .hidden {
       display: none;
+    }
+
+    /* Estilos para o calendário */
+    .calendar td {
+      height: 3rem;
+      vertical-align: middle;
+      cursor: default;
     }
   </style>
 </head>
