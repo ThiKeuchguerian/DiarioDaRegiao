@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const BuscarButton = document.getElementById('Buscar');
-  const CorrigirButton = document.getElementById('Corrigir');
-  const ZeraRetButton = document.getElementById('ZeraRet');
+  const BuscarButton = document.getElementById('btn-buscar');
+  const CorrigirButton = document.getElementById('btn-corrigir');
   const CodEmpInput = document.getElementById('CodEmp');
   const NumNotaInput = document.getElementById('NumNota');
 
@@ -11,11 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
     NumNotaInput.setAttribute('required', 'required');
   });
   CorrigirButton.addEventListener('click', function () {
-    // Torna os campos obrigatórios quando o botão "Excluir" é clicado
-    CodEmpInput.setAttribute('required', 'required');
-    NumNotaInput.setAttribute('required', 'required');
-  });
-  ZeraRetButton.addEventListener('click', function () {
     // Torna os campos obrigatórios quando o botão "Excluir" é clicado
     CodEmpInput.setAttribute('required', 'required');
     NumNotaInput.setAttribute('required', 'required');
@@ -38,29 +32,27 @@ document.querySelectorAll('.str-input').forEach(function (input) {
 const modal = $("#modal");
 
 const btnEditClientModal = $('#btn-edit-client-modal');
-// const formEditClient = $('#editFormCli');
-btnEditClientModal.click(function () {
+$(document).on('click', '#btn-edit-client-modal', function () {
   $("#modal-title").text("Editar Cliente");
   $("#section-edit-client").show();
   $("#section-edit-nota").hide();
   $("#section-edit-itens").hide();
 
-  $('#CodCli').val(btnEditClientModal.attr("data-codcli"));
-  $('#NomeCli').val(btnEditClientModal.attr("data-nomcli"));
-  $('#TribICMS').val(btnEditClientModal.attr("data-TICMS"));
-  $('#TribIPI').val(btnEditClientModal.attr("data-TIPI"));
-  $('#TribPIS').val(btnEditClientModal.attr("data-TPIS"));
-  $('#TribCofins').val(btnEditClientModal.attr("data-TCOFINS"));
-  $('#RetIR').val(btnEditClientModal.attr("data-IR"));
-  $('#RetCSLL').val(btnEditClientModal.attr("data-CSLL"));
-  $('#RetPIS').val(btnEditClientModal.attr("data-PIS"));
-  $('#RetCofins').val(btnEditClientModal.attr("data-COFINS"));
-  $('#OutrasRet').val(btnEditClientModal.attr("data-OutrasR"));
-  $('#RetProd').val(btnEditClientModal.attr("data-RetPro"));
+  $('#CodCli').val($(this).attr("data-codcli"));
+  $('#NomeCli').val($(this).attr("data-nomcli"));
+  $('#TribICMS').val($(this).attr("data-TICMS"));
+  $('#TribIPI').val($(this).attr("data-TIPI"));
+  $('#TribPIS').val($(this).attr("data-TPIS"));
+  $('#TribCofins').val($(this).attr("data-TCOFINS"));
+  $('#RetIR').val($(this).attr("data-IR"));
+  $('#RetCSLL').val($(this).attr("data-CSLL"));
+  $('#RetPIS').val($(this).attr("data-PIS"));
+  $('#RetCofins').val($(this).attr("data-COFINS"));
+  $('#OutrasRet').val($(this).attr("data-OutrasR"));
+  $('#RetProd').val($(this).attr("data-RetPro"));
 });
 
 const btnEditNotaModal = $('#btn-edit-nota-modal');
-// const formEditNota = $('#form-edit-nota');
 btnEditNotaModal.click(function () {
   $("#modal-title").text("Editar nota");
   $("#section-edit-client").hide();
@@ -83,30 +75,28 @@ btnEditNotaModal.click(function () {
 });
 
 const btnEditItensModal = $('#btn-edit-itens-modal');
-const btn = $(this);
-// const editFormItens = $('from-edit-item');
-btnEditItensModal.click(function () {
+$(document).on('click', '#btn-edit-itens-modal', function () {
   $("#modal-title").text("Editar items");
   $("#section-edit-client").hide();
   $("#section-edit-nota").hide();
   $("#section-edit-itens").show();
 
-  $('#editCodEmp').val(btnEditItensModal.attr("data-codemp"));
-  $('#editNumNota').val(btnEditItensModal.attr("data-numnfv"));
-  $('#editTipo').val(btnEditItensModal.attr("data-tipo"));
-  $('#editSeq').val(btnEditItensModal.attr("data-seqisv"));
-  $('#editVlrBaseNota').val(btnEditItensModal.attr("data-vlrlse"));
-  $('#editVlrBaseIR').val(btnEditItensModal.attr("data-vlrbir"));
-  $('#editPercIR').val(btnEditItensModal.attr("data-perirf"));
-  $('#editVlrIR').val(btnEditItensModal.attr("data-vlrirf"));
-  $('#editVlrBaseCSLL').val(btnEditItensModal.attr("data-vlrbcl"));
-  $('#editPercCSLL').val(btnEditItensModal.attr("data-percsl"));
-  $('#editVlrCSLL').val(btnEditItensModal.attr("data-vlrcsl"));
-  $('#editVlrBasePIS').val(btnEditItensModal.attr("data-vlrbpt"));
-  $('#editPercPIS').val(btnEditItensModal.attr("data-perpit"));
-  $('#editVlrPIS').val(btnEditItensModal.attr("data-vlrpit"));
-  $('#editVlrBaseCOFINS').val(btnEditItensModal.attr("data-vlrbct"));
-  $('#editPercCOFINS').val(btnEditItensModal.attr("data-percrt"));
-  $('#editVlrCOFINS').val(btnEditItensModal.attr("data-vlrcrt"));
-  $('#editVlrTotal').val(btnEditItensModal.attr("data-vlrtotal"));
+  $('#editCodEmp').val($(this).attr("data-codemp"));
+  $('#editNumNota').val($(this).attr("data-numnfv"));
+  $('#editTipo').val($(this).attr("data-tipo"));
+  $('#editSeq').val($(this).attr("data-seqisv"));
+  $('#editVlrBaseNota').val($(this).attr("data-vlrlse"));
+  $('#editVlrBaseIR').val($(this).attr("data-vlrbir"));
+  $('#editPercIR').val($(this).attr("data-perirf"));
+  $('#editVlrIR').val($(this).attr("data-vlrirf"));
+  $('#editVlrBaseCSLL').val($(this).attr("data-vlrbcl"));
+  $('#editPercCSLL').val($(this).attr("data-percsl"));
+  $('#editVlrCSLL').val($(this).attr("data-vlrcsl"));
+  $('#editVlrBasePIS').val($(this).attr("data-vlrbpt"));
+  $('#editPercPIS').val($(this).attr("data-perpit"));
+  $('#editVlrPIS').val($(this).attr("data-vlrpit"));
+  $('#editVlrBaseCOFINS').val($(this).attr("data-vlrbct"));
+  $('#editPercCOFINS').val($(this).attr("data-percrt"));
+  $('#editVlrCOFINS').val($(this).attr("data-vlrcrt"));
+  $('#editVlrTotal').val($(this).attr("data-vlrtotal"));
 });

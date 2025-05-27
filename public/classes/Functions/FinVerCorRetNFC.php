@@ -112,7 +112,7 @@ class FinVerificaCorrigeRecencaoNFC
         perpit    = 0.65,
         vlrbpt    = vlrlse,
         vlrpit    = (vlrlse*0.65)/100,
-        percrt,
+        percrt    = 3.00,
         vlrbct    = vlrlse,
         vlrcrt    = (vlrlse*3.00)/100,
         VlrRetencao = 
@@ -170,24 +170,33 @@ class FinVerificaCorrigeRecencaoNFC
    *  - 'IR'
    *  - 'CSLL'
    */
-  public function corrigirRetencao(
-    int    $codEmp,
-    string $numNota,
-    string $tipoRetencao
-  ): void {
+  public function corrigirRetencao(int $codEmp, string $numNota, string $tipoRetencao): void
+  {
     $mapNFV = [
       'Todas' => "vlrbir=vlrlse, vlrirf=(vlrlse*4.8)/100,
-                  vlrbcl=vlrlse, vlrcsl=(vlrlse*1)/100,
-                  vlrbpt=vlrlse, vlrpit=(vlrlse*0.65)/100,
-                  vlrbct=vlrlse, vlrcrt=(vlrlse*3.00)/100",
+                    vlrbcl=vlrlse, vlrcsl=(vlrlse*1)/100,
+                    vlrbpt=vlrlse, vlrpit=(vlrlse*0.65)/100,
+                    vlrbct=vlrlse, vlrcrt=(vlrlse*3.00)/100",
       'IR'    => "vlrbir=vlrlse, vlrirf=(vlrlse*4.8)/100",
       'CSLL'  => "vlrbcl=vlrlse, vlrcsl=(vlrlse*1)/100,
-                  vlrbpt=vlrlse, vlrpit=(vlrlse*0.65)/100,
-                  vlrbct=vlrlse, vlrcrt=(vlrlse*3.00)/100"
+                    vlrbpt=vlrlse, vlrpit=(vlrlse*0.65)/100,
+                    vlrbct=vlrlse, vlrcrt=(vlrlse*3.00)/100"
     ];
+    $mapINFV = [
+      'Todas' => "vlrbir=vlrlse, vlrirf=(vlrlse*4.8)/100,
+                    vlrbcl=vlrlse, vlrcsl=(vlrlse*1)/100,
+                    vlrbpt=vlrlse, vlrpit=(vlrlse*0.65)/100,
+                    vlrbct=vlrlse, vlrcrt=(vlrlse*3.00)/100",
+      'IR'    => "vlrbir=vlrlse, perirf=4.80, vlrirf=(vlrlse*4.8)/100",
+
+      'CSLL'  => "vlrbcl=vlrlse, percsl='1.00', vlrcsl=(vlrlse*1)/100,
+                    vlrbpt=vlrlse, perpit='0.65', vlrpit=(vlrlse*0.65)/100,
+                    vlrbct=vlrlse, percrt='3.00', vlrcrt=(vlrlse*3.00)/100"
+    ];
+
     if (isset($mapNFV[$tipoRetencao])) {
       $this->updateNFV($mapNFV[$tipoRetencao], $codEmp, $numNota);
-      $this->updateISV($mapNFV[$tipoRetencao], $codEmp, $numNota);
+      $this->updateISV($mapINFV[$tipoRetencao], $codEmp, $numNota);
     }
   }
 
@@ -198,7 +207,118 @@ class FinVerificaCorrigeRecencaoNFC
   {
     $set0 = "vlrbir=0, vlrirf=0, vlrbcl=0, vlrcsl=0,
              vlrbpt=0, vlrpit=0, vlrbct=0, vlrcrt=0";
+
+    $set1 = "vlrbir=0, perirf=0, vlrirf=0, 
+             vlrbcl=0, percsl=0, vlrcsl=0,
+             vlrbpt=0, perpit=0, vlrpit=0, 
+             vlrbct=0, percrt=0, vlrcrt=0";
     $this->updateNFV($set0, $codEmp, $numNota);
-    $this->updateISV($set0, $codEmp, $numNota);
+    $this->updateISV($set1, $codEmp, $numNota);
+  }
+
+  /**
+   * Atualiza Cliente
+   * @param array $dados
+   */
+  public function atualizarCliente(array $dados): void
+  {
+    if (isset($dados['btn-salvarcli'])) {
+      $sql = "UPDATE e085cli SET 
+        triicm   = :TribICMS,
+        triipi   = :TribIPI,
+        tripis   = :TribPIS,
+        tricof   = :TribCofins,
+        retirf   = :RetIR,
+        retcsl   = :RetCSLL,
+        retpis   = :RetPIS,
+        retcof   = :RetCofins,
+        retour   = :OutrasRet,
+        retpro   = :RetProd
+        WHERE codcli = :CodCli
+      ";
+
+      $params = [
+        'CodCli'     => $dados['CodCli'],
+        'TribICMS'   => $dados['TribICMS'],
+        'TribIPI'    => $dados['TribIPI'],
+        'TribPIS'    => $dados['TribPIS'],
+        'TribCofins' => $dados['TribCofins'],
+        'RetIR'      => $dados['RetIR'],
+        'RetCSLL'    => $dados['RetCSLL'],
+        'RetPIS'     => $dados['RetPIS'],
+        'RetCofins'  => $dados['RetCofins'],
+        'OutrasRet'  => $dados['OutrasRet'],
+        'RetProd'    => $dados['RetProd']
+      ];
+    } else if (isset($dados['btn-salvarnf'])) {
+      $sql  = "UPDATE E140NFV SET 
+          vlrbir = :VlrBIR, 
+          vlrirf = :VlrIR, 
+          vlrbcl = :VlrBCSLL, 
+          vlrcsl = :VlrCSLL, 
+          vlrbpt = :VlrBPIS, 
+          vlrpit = :VlrPIS, 
+          vlrbct = :VlrBCofins, 
+          vlrcrt = :VlrCofins
+        WHERE codemp = :CodEmpresa AND numnfv = :NNota AND codsnf='NSC'
+      ";
+
+      $params = [
+        'CodEmpresa' => $dados['CodEmpresa'],
+        'NNota'      => $dados['NNota'],
+        'VlrBIR'     => $dados['VlrBIR'],
+        'VlrIR'      => $dados['VlrIR'],
+        'VlrBCSLL'   => $dados['VlrBCSLL'],
+        'VlrCSLL'    => $dados['VlrCSLL'],
+        'VlrBPIS'    => $dados['VlrBPIS'],
+        'VlrPIS'     => $dados['VlrPIS'],
+        'VlrBCofins' => $dados['VlrBCofins'],
+        'VlrCofins'  => $dados['VlrCofins']
+      ];
+    } else if (isset($dados['btn-salvarinf'])) {
+      $sql = "UPDATE E140ISV SET
+          vlrlse = :VlrBaseNota, 
+          vlrbir = :VlrBaseIR, 
+          perirf = :PercIR, 
+          vlrirf = :VlrIR, 
+          vlrbcl = :VlrBaseCSLL, 
+          percsl = :PercCSLL, 
+          vlrcsl = :VlrCSLL,
+          vlrbpt = :VlrBasePIS, 
+          perpit = :PercPIS, 
+          vlrpit = :VlrPIS,
+          vlrbct = :VlrBaseCOFINS, 
+          percrt = :PercCOFINS, 
+          vlrcrt = :VlrCOFINS
+        WHERE codemp = :CodEmpresa AND numnfv = :NNota AND codsnf='NSC'
+      ";
+
+      $params = [
+        'CodEmpresa'    => $dados['editCodEmp'],
+        'NNota'         => $dados['editNumNota'],
+        'VlrBaseNota'   => $dados['editVlrBaseNota'],
+        'VlrBaseIR'     => $dados['editVlrBaseIR'],
+        'PercIR'        => $dados['editPercIR'],
+        'VlrIR'         => $dados['editVlrIR'],
+        'VlrBaseCSLL'   => $dados['editVlrBaseCSLL'],
+        'PercCSLL'      => $dados['editPercCSLL'],
+        'VlrCSLL'       => $dados['editVlrCSLL'],
+        'VlrBasePIS'    => $dados['editVlrBasePIS'],
+        'PercPIS'       => $dados['editPercPIS'],
+        'VlrPIS'        => $dados['editVlrPIS'],
+        'VlrBaseCOFINS' => $dados['editVlrBaseCOFINS'],
+        'PercCOFINS'    => $dados['editPercCOFINS'],
+        'VlrCOFINS'     => $dados['editVlrCOFINS']
+      ];
+    }
+
+    // echo "<pre>";
+    // var_dump($params);
+    // var_dump($dados);
+    // var_dump($sql);
+    // die();
+
+    $stmt = $this->senior->prepare($sql);
+    $stmt->execute($params);
   }
 }
