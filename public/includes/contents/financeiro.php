@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col">
     <a href="financeiro/FinVerCorRetNFC.php" class="btn btn-primary btn-sm" style="color: white;"> Verifica Retenção de Nota NSC </a>
-    <!-- <a href="VerificaCentroCustoFam.php" class="btn btn-primary btn-sm" style="color: white;"> Verifica Centro de Custo/Cod. FAM </a> -->
+    <a href="financeiro/FinVerCentroCustFam.php" class="btn btn-primary btn-sm" style="color: white;"> Verifica Centro de Custo/Cod. FAM </a>
     <div class="mb-3"></div>
     <!-- <a href="MovimentacaoEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque </a> -->
     <!-- <a href="MovimentacaoEstoqueDiferenca.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque Com Diferença </a> -->
