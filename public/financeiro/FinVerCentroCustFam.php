@@ -38,6 +38,10 @@ if (isset($_POST['btn-buscar'])) {
       }
     }
   }
+} else if (isset($_POST['btn-salvar'])) {
+  $dados = $_POST;
+
+  $updateRateio = $CentroCustoFam->updateRateio($dados);
 }
 
 // Inclui o header da página
@@ -88,9 +92,9 @@ require_once __DIR__ . '/../includes/header.php';
   <div class="container">
     <div class="card shadow-sm h-100">
       <h5 class="card-header bg-primary text-white">
-        Pedidos -> <?= COUNT($ConsultaPedido) ?> || 
-        Qtde. Pedido Corretos: <?= $countOk ?>   || 
-        Qtde. Pedido Incorretos: <?= $countX ?>  ||
+        Pedidos -> <?= COUNT($ConsultaPedido) ?> ||
+        Qtde. Pedido Corretos: <?= $countOk ?> ||
+        Qtde. Pedido Incorretos: <?= $countX ?> ||
         Cod. Família: <?= $CodFam ?>
       </h5>
       <div class="card-body">
@@ -139,17 +143,17 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php else : ?>
                   <td style="text-align: center; width: 1%;"><span style='color: red; font-weight: bold;'><?= $status ?></span></td>
                   <td style="width: 1%;">
-                    <button type='button' class='btn btn-primary btn-sm' id="btn-edit-modal" data-bs-toggle='modal' data-bs-target="#modal" 
+                    <button type='button' class='btn btn-primary btn-sm' id="btn-edit-modal" data-bs-toggle='modal' data-bs-target="#modal"
                       data-numped="<?= $item['numped'] ?>"
-                      data-pedcli="<?= $item['pedcli'] ?>" 
-                      data-codcli="<?= $item['codcli'] ?>" 
-                      data-ctafin="<?= $item['ctafin'] ?>" 
-                      data-ctared="<?= $item['ctared'] ?>" 
-                      data-codccu="<?= $item['codccu'] ?>" 
-                      data-codfam="<?= $item['codfam'] ?>" 
-                      data-codser="<?= $item['codser'] ?>" 
-                      data-tnsser="<?= $item['tnsser'] ?>" 
-                      data-nomcli="<?= $item['nomcli'] ?>" 
+                      data-pedcli="<?= $item['pedcli'] ?>"
+                      data-codcli="<?= $item['codcli'] ?>"
+                      data-ctafin="<?= $item['ctafin'] ?>"
+                      data-ctared="<?= $item['ctared'] ?>"
+                      data-codccu="<?= $item['codccu'] ?>"
+                      data-codfam="<?= $item['codfam'] ?>"
+                      data-codser="<?= $item['codser'] ?>"
+                      data-tnsser="<?= $item['tnsser'] ?>"
+                      data-nomcli="<?= $item['nomcli'] ?>"
                       data-desser="<?= $item['desser'] ?>">
                       Editar
                     </button>

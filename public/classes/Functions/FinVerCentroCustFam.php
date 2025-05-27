@@ -16,8 +16,8 @@ class CentroCustoFam
   // -----------------------------------------------------------
   public function consultaFamilia(): array
   {
-    $sql = 
-    " SELECT f.codfam, f.desfam FROM e012fam f 
+    $sql =
+      " SELECT f.codfam, f.desfam FROM e012fam f 
         INNER JOIN e120isp p WITH (NOLOCK) ON f.codemp = p.codemp AND f.codfam = p.codfam
         WHERE f.codemp = 1 
         GROUP BY f.codfam, f.desfam
@@ -81,6 +81,27 @@ class CentroCustoFam
 
     $stmt = $this->senior->prepare($sql);
     $stmt->execute(['CodFam' => $CodFam]);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return $result;
+  }
+
+  public function updateRateio(array $dados): array
+  {
+    // echo "<pre>";
+    // var_dump($dados);
+    // die();
+    $sql = "UPDATE e120rat SET codccu = :codccu WHERE codemp = 1 AND numped = :numped";
+
+    $params = [
+      ':codccu' => $dados['codccu'],
+      ':numped' => $dados['numped']
+    ];
+    echo "<pre>";
+    var_dump($params);
+    die();
+    $stmt = $this->senior->prepare($sql);
+    $stmt->execute($params);
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     return $result;
