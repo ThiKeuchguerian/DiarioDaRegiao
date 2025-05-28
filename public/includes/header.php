@@ -181,7 +181,7 @@
     }
 
     /* Estilos para o calendário */
-    .calendar td,th {
+    .calendar {
       height: 1.5rem;
       /* Altura menor */
       width: 1.5rem;
