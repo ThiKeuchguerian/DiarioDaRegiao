@@ -43,24 +43,41 @@ class EdicoesFlip
    * Gera o HTML de um calendário para um mês/ano,
    * recebendo um array flipado das datas marcadas para lookup rápido.
    */
+  function obterNomeMesEmPortugues(int $month, int $year): string
+  {
+    $data = new DateTime();
+    $data->setDate($year, $month, 1);
+
+    $formatter = new IntlDateFormatter(
+      'pt_BR', // Locale
+      IntlDateFormatter::LONG, // Tipo de data (exibe nome completo do mês)
+      IntlDateFormatter::NONE, // Sem hora
+      'America/Sao_Paulo',     // Fuso horário
+      IntlDateFormatter::GREGORIAN,
+      "LLLL 'de' yyyy"         // Padrão customizado (LLLL = mês por extenso)
+    );
+
+    return ucfirst($formatter->format($data)); // Coloca a primeira letra maiúscula
+  }
+
   function gerarCalendario(int $month, int $year, array $markedDates): string
   {
     $firstDayOfMonth = mktime(0, 0, 0, $month, 1, $year);
     $daysInMonth     = date('t', $firstDayOfMonth);
     $dayOfWeek       = date('N', $firstDayOfMonth); // 1 (Seg) a 7 (Dom)
 
-    $html  = '<table class="table table-bordered calendar">';
-    $html .= '<thead class="table-light"><tr>';
+    $html  = '<table class="table table-bordered calendar w-100">';
+    $html .= '<thead class="table-light"><tr style="text-align: center;">';
     $dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     foreach ($dias as $d) {
-      $html .= "<th class=\"text-center\">{$d}</th>";
+      $html .= "<th class=\"text-center\" style=\"width: 14.28%;\">{$d}</th>";
     }
     $html .= '</tr></thead><tbody><tr>';
 
     // espaços antes do 1º dia
     $cellCount = 0;
     for ($i = 1; $i < $dayOfWeek; $i++, $cellCount++) {
-      $html .= '<td></td>';
+      $html .= '<td style="width: 14.28%;"></td>';
     }
 
     // dias do mês
@@ -76,11 +93,12 @@ class EdicoesFlip
 
     // espaços finais
     while ($cellCount % 7 !== 0) {
-      $html .= '<td></td>';
+      $html .= '<td style="width: 14.28%;"></td>';
       $cellCount++;
     }
 
     $html .= '</tr></tbody></table>';
+
     return $html;
   }
 
@@ -97,9 +115,9 @@ class EdicoesFlip
     for ($m = 1; $m <= 12; $m++) {
       $nomeMes = ucfirst(strftime('%B', mktime(0, 0, 0, $m, 1, $year)));
       $mesesHTML .= '<div class="col">';
-      $mesesHTML .= '<div class="card h-100">';
+      $mesesHTML .= '<div class="card shadow-sm mb-0">';
       $mesesHTML .= "  <div class=\"card-header text-center fw-bold\">{$nomeMes}</div>";
-      $mesesHTML .= '  <div class="card-body p-2">';
+      $mesesHTML .= '  <div class="card-body p-1">';
       $mesesHTML .= $this->gerarCalendario($m, $year, $marked);
       $mesesHTML .= '  </div>';
       $mesesHTML .= '</div>';
