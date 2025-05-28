@@ -61,7 +61,7 @@ class CentroCustoFam
     $where1 = "WHERE ped.codemp = 1 AND isp.codfam = :codFam1";
     $where2 = "WHERE ped.codemp = 1 AND isp.codfam = :codFam2";
 
-    $sql = $querySer . "\n" . $where1 . "\n" . "UNION ALL\n" . $queryProd . "\n" . $where2;
+    $sql = $querySer . "\n" . $where1 . "\n" . "UNION ALL\n" . $queryProd . "\n" . $where2 . "\n ORDER BY ped.numped, ped.datemi";
 
     // echo "<pre>";
     // var_dump($CodFam);
