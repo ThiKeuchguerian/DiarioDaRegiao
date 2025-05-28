@@ -7,7 +7,7 @@ class ContabilConsultaOutrosDoc
 
   public function __construct()
   {
-    $this->senior = DatabaseConnection::getConnection('seniorTeste');
+    $this->senior = DatabaseConnection::getConnection('senior');
 
     $this->senior->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
   }
