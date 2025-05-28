@@ -88,7 +88,7 @@ require_once __DIR__ . '/../includes/header.php';
         <?= $dados ?> Edições do <?= $nameProd ?> no Ano <?= $ano ?>
       </h5>
       <div class="card-body d-flex flex-column">
-        <div class="row row-cols-0 row-cols-md-3 g-2">
+        <div class="row row-cols row-cols-md-4 g-2">
           <?php echo $calendarHTML; ?>
         </div>
       </div>
@@ -97,8 +97,6 @@ require_once __DIR__ . '/../includes/header.php';
 <?php endif; ?>
 
 <!-- Inclui os JavaScript -->
-<script src="<?= URL_PRINCIPAL ?>js/maskcampos.js"></script>
-<script src="<?= URL_PRINCIPAL ?>js/exibirtabela.js"></script>
 
 <!-- Inclui o footer da página -->
 <?php
