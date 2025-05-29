@@ -2,8 +2,9 @@
   <div class="col">
     <a href="financeiro/FinVerCorRetNFC.php" class="btn btn-primary btn-sm" style="color: white;"> Verifica Retenção de Nota NSC </a>
     <a href="financeiro/FinVerCentroCustFam.php" class="btn btn-primary btn-sm" style="color: white;"> Verifica Centro de Custo/Cod. FAM </a>
+    <a href="financeiro/FinVerCentroCustOp.php" class="btn btn-primary btn-sm" style="color: white;"> Verifica Centro Custo/Ordem Prod. </a>
     <div class="mb-3"></div>
-    <!-- <a href="MovimentacaoEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque </a> -->
+    <a href="financeiro/FinMovEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque </a>
     <!-- <a href="MovimentacaoEstoqueDiferenca.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque Com Diferença </a> -->
     <div class="mb-3"></div>
     <!-- <a href="ConsultaEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Estoque (Qtde/Preço Medio/Vlr. Est) </a> -->
