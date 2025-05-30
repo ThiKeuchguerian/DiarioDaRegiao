@@ -45,7 +45,7 @@ class CentroCustoOrdermProducao
       $sql .= "\n  AND " . implode("\n  AND ", $conds);
     }
 
-    $sql .= "\n ORDER BY M.datmov, M.numdoc";
+    $sql .= "\n ORDER BY M.datmov, M.numdoc, M.codpro";
 
     $stmt = $this->senior->prepare($sql);
     $stmt->execute($params);
@@ -55,10 +55,10 @@ class CentroCustoOrdermProducao
   /**
    * Média analítica de movimentação (mês a mês e diferença)
    */
-  public function consultaOrdemProducao(string|array $numDoc): array
+  public function consultaOrdemProducao(array $numDoc): array
   {
     $sql =
-      "SELECT cop.numorp, cop.codfam, cop.codpro, prd.despro, cop.tmpprv, cop.qtdprv,
+      "SELECT cop.numorp, cop.codfam, cop.codpro, prd.despro AS Produto, cop.tmpprv, cop.qtdprv AS QtdeProd,
           cmo.codcmp, pro.despro, cmo.qtdprv, cmo.qtduti, cmo.codccu FROM e900cop cop
         INNER JOIN e900cmo cmo WITH (NOLOCK) ON cop.codemp = cmo.codemp AND cop.codori = cmo.codori AND cop.numorp = cmo.numorp
         INNER JOIN e075der der WITH (NOLOCK) ON cop.codemp = der.codemp AND cmo.codcmp = der.codpro AND cmo.codder = der.codder
@@ -80,9 +80,11 @@ class CentroCustoOrdermProducao
       $params = [':numDoc' => $numDoc];
       $sql .= "\n WHERE cop.numorp = :numDoc";
     }
-
-    $sql .= "\n ORDER BY cop.numorp, cmo.codcmp";
-
+    
+    $sql .= "\n AND cop.codori = '11' ORDER BY cop.numorp, cmo.codcmp";
+    // echo "<pre>";
+    // var_dump($teste);
+    // die();
     $stmt = $this->senior->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
