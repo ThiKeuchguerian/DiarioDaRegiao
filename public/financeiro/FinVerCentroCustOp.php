@@ -97,6 +97,32 @@ require_once __DIR__ . '/../includes/header.php';
         <?php
         // pega as movimentações daquele mesmo número, ou array vazio
         $mvItens = $agrupadoMvto[$numorp] ?? [];
+
+        // Verifica se todos os componentes “casam” com a movimentação
+        $correto = true;
+        foreach ($opItens as $comp) {
+          // encontra o movimento equivalente pelo codpro
+          $achou = false;
+          foreach ($mvItens as $mv) {
+            if ($comp['codcmp'] == $mv['codpro']) {
+              $achou = true;
+              if ($comp['codccu'] != $mv['codccu']) {
+                $correto = false;
+              }
+              break;
+            }
+          }
+          if (!$achou) {
+            $correto = false;
+            break;
+          }
+        }
+        //echo "<pre>"; var_dump($correto); die();
+        // se precisar retornar só as erradas incluir linhas abaixo na linha 127 e 205 respectivamente
+        /*
+        <?php if (!$achou) : ?>
+        <?php endif; ?>
+        */
         ?>
         <div class="card-body">
           <h5 class="card-header bg-primary text-white">
@@ -170,6 +196,9 @@ require_once __DIR__ . '/../includes/header.php';
                 </tbody>
               </table>
             </div>
+            <span class="badge <?= $correto ? 'bg-primary' : 'bg-danger' ?>">
+              <?= $correto ? 'Correto' : 'Errado' ?>
+            </span>
           </div>
         </div>
       <?php endforeach; ?>
