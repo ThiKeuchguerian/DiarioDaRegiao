@@ -65,16 +65,18 @@ if (isset($_POST['btn-buscar'])) {
       }
     }
   }
-}
-// echo json_encode($agrupado);
-
-function depurar($var)
-{
-  echo json_encode($var);
-  die();
-  echo "<pre>";
-  var_dump($var);
-  die();
+  foreach ($agrupadoMvto as $numorp) {
+    $status = true;
+    $statusOk = 0;
+    $statusXX = 0;
+    if ($numorp['master'][0]['codccu'] === $numorp['movimento'][0]['codccu']) {
+      $status = true;
+      $statusOk++;
+    } else {
+      $status = false;
+      $statusXX++;
+    }
+  }
 }
 
 
@@ -127,7 +129,9 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card shadow-sm ">
       <h5 class="card-header bg-primary text-white">
         <?php if ($mesAno <> '') : ?>
-          Em <?= $mesAno ?> || Qtde. O.P.: <?= $dados ?>
+          Em <?= $mesAno ?> || Qtde. O.P.: <?= $dados ?> || 
+          Qtde. O.P. com C.Custo OK: <?= $statusOk ?> ||
+          Qtde. O.P. com C.Custo XX: <?= $statusXX ?>
         <?php else : ?>
           O.P. Nº: <?= $numDoc ?> || Qtde. O.P.: <?= $dados ?>
         <?php endif; ?>
@@ -139,7 +143,13 @@ require_once __DIR__ . '/../includes/header.php';
               O.P.: <?= $numorp['master'][0]['numorp'] ?> ||
               Produto: <?= $numorp['master'][0]['codpro'] ?> - <?= $numorp['master'][0]['Produto'] ?> || <br>
               Qtde. Prod.: <?= number_format($numorp['master'][0]['QtdeProd'], 3, ',', '.') ?> ||
-              C.Custo: <?= $numorp['master'][0]['codccu'] ?>
+              C.Custo OP: <?= $numorp['master'][0]['codccu'] ?> ||
+              C.Custo Mov.: <?= $numorp['movimento'][0]['codccu'] ?> ||
+              Status:<?php if ($status) : ?>
+              <span class="badge bg-success">OK</span>
+            <?php else : ?>
+              <span class="badge bg-danger">XX</span>
+            <?php endif; ?>
             </h5>
             <div class="row">
               <div class="col-md-6">
