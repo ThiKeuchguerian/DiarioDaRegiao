@@ -10,39 +10,74 @@ $CentroCustoOrdermProducao = new CentroCustoOrdermProducao();
 
 if (isset($_POST['btn-buscar'])) {
   $mesAno = $_POST['MesAno'];
+  $numDoc = $_POST['NumOP'];
 
-  $consultaMovimentoEstoque = $CentroCustoOrdermProducao->movimentoEstoque($mesAno);
-  // Pega todos os numdoc dos resultados
-  $numDoc = array_unique(array_column($consultaMovimentoEstoque, 'NumDoc'));
-  $consultaOrdemProducao = $CentroCustoOrdermProducao->consultaOrdemProducao($numDoc);
-  // echo "<pre>";
-  // var_dump($consultaMovimentoEstoque[0]);
-  // var_dump($consultaOrdemProducao[0]);
-  // die();
+  if ($mesAno <> '' && $numDoc == '') {
+    // echo "<pre>";
+    // var_dump($mesAno, $numDoc);
+    // die();
+    $buscaNumeroOp = $CentroCustoOrdermProducao->buscaNumeroOP($mesAno);
+    // Pega todos os numdoc dos resultados
+    $numDoc = array_unique(array_column($buscaNumeroOp, 'numdoc'));
 
-  $dados = COUNT(array_unique(array_column($consultaOrdemProducao, 'numorp')));
+    $consultaMovimentoEstoque = $CentroCustoOrdermProducao->movimentoEstoque($numDoc);
+    $consultaOrdemProducao = $CentroCustoOrdermProducao->consultaOrdemProducao($numDoc);
+    // echo "<pre>";
+    // var_dump($numDoc, $consultaMovimentoEstoque);
+    // die();
+    $dados = COUNT(array_unique(array_column($consultaOrdemProducao, 'numorp')));
+  } else if ($mesAno == '' && $numDoc <> '') {
+    $consultaMovimentoEstoque = $CentroCustoOrdermProducao->movimentoEstoque($numDoc);
+    $consultaOrdemProducao = $CentroCustoOrdermProducao->consultaOrdemProducao($numDoc);
+    // echo "<pre>";
+    // var_dump($consultaMovimentoEstoque);
+    // die();
+    $dados = COUNT(array_unique(array_column($consultaOrdemProducao, 'ChaveAgrup')));
+  }
+
 
   $agrupandoOp = [];
   foreach ($consultaOrdemProducao as $item) {
-    $numorp = $item['numorp'];
-    if (!isset($agrupandoOp[$numorp])) {
-      $agrupandoOp[$numorp] = [];
+    $chave = $item['numorp'] . $item['codori'];
+    if (!isset($agrupandoOp[$chave])) {
+      $agrupandoOp[$chave] = [];
+      $agrupandoOp[$chave][] = $item;
+    } else {
+      array_push($agrupandoOp[$chave], $item);
     }
-    $agrupandoOp[$numorp][] = $item;
   }
 
   $agrupadoMvto = [];
   foreach ($consultaMovimentoEstoque as $item) {
-    $numdoc = $item['NumDoc'];
-    if (!isset($agrupadoMvto[$numdoc])) {
-      $agrupadoMvto[$numdoc] = [];
+    $chave = $item['NumDoc'] . $item['oriorp'];
+    if (isset($agrupandoOp[$chave])) {
+      if (!isset($agrupadoMvto[$chave])) {
+        $agrupadoMvto[$chave] = [];
+        $agrupadoMvto[$chave] = ['master' => $agrupandoOp[$chave], 'movimento' => []];
+        if (!isset($agrupadoMvto[$chave]['movimento'])) {
+          $agrupadoMvto[$chave]['movimento'] = [];
+          $agrupadoMvto[$chave]['movimento'][] = $item;
+        } else {
+          array_push($agrupadoMvto[$chave]['movimento'], $item);
+        }
+      } else {
+        array_push($agrupadoMvto[$chave]['movimento'], $item);
+      }
     }
-    $agrupadoMvto[$numdoc][] = $item;
   }
-  // echo "<pre>";
-  // var_dump($agrupandoOp);
-  // die();
 }
+// echo json_encode($agrupado);
+
+function depurar($var)
+{
+  echo json_encode($var);
+  die();
+  echo "<pre>";
+  var_dump($var);
+  die();
+}
+
+
 // Inclui o header da página
 require_once __DIR__ . '/../includes/header.php';
 ?>
@@ -91,116 +126,93 @@ require_once __DIR__ . '/../includes/header.php';
   <div class="container">
     <div class="card shadow-sm ">
       <h5 class="card-header bg-primary text-white">
-        Em <?= $mesAno ?> || Qtde. O.P.: <?= $dados ?>
-      </h5>
-      <?php foreach ($agrupandoOp as $numorp => $opItens): ?>
-        <?php
-        // pega as movimentações daquele mesmo número, ou array vazio
-        $mvItens = $agrupadoMvto[$numorp] ?? [];
-
-        // Verifica se todos os componentes “casam” com a movimentação
-        $correto = true;
-        foreach ($opItens as $comp) {
-          // encontra o movimento equivalente pelo codpro
-          $achou = false;
-          foreach ($mvItens as $mv) {
-            if ($comp['codcmp'] == $mv['codpro']) {
-              $achou = true;
-              if ($comp['codccu'] != $mv['codccu']) {
-                $correto = false;
-              }
-              break;
-            }
-          }
-          if (!$achou) {
-            $correto = false;
-            break;
-          }
-        }
-        //echo "<pre>"; var_dump($correto); die();
-        // se precisar retornar só as erradas incluir linhas abaixo na linha 127 e 205 respectivamente
-        /*
-        <?php if (!$achou) : ?>
+        <?php if ($mesAno <> '') : ?>
+          Em <?= $mesAno ?> || Qtde. O.P.: <?= $dados ?>
+        <?php else : ?>
+          O.P. Nº: <?= $numDoc ?> || Qtde. O.P.: <?= $dados ?>
         <?php endif; ?>
-        */
-        ?>
-        <div class="card-body">
-          <h5 class="card-header bg-primary text-white">
-            Ordem de Produção: <?= $numorp ?> ||
-            Produto: <?= $opItens[0]['codpro'] ?> - <?= $opItens[0]['Produto'] ?> ||
-            Qtde. Prod.: <?= number_format($opItens[0]['QtdeProd'], 3, ',', '.') ?> ||
-            C.Custo: <?= $opItens[0]['codccu'] ?>
-          </h5>
-          <div class="row">
-            <div class="col-md-6">
-              <h6 class="card-header bg-primary text-white">
-                Componentes da O.P.
-              </h6>
-              <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
-                <thead>
-                  <tr class="table-primary">
-                    <th scope="col">Cod. Comp.</th>
-                    <th scope="col">Descição Componente</th>
-                    <th scope="col">Tempo Prod.</th>
-                    <th scope="col">Qtde. Comp.</th>
-                    <th scope="col">Qtde. Utilizada.</th>
-                    <th scope="col">C.Custo OP</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php foreach ($opItens as $item): ?>
-                    <tr>
-                      <td><?= $item['codcmp'] ?></td>
-                      <td><?= $item['despro'] ?></td>
-                      <td style="text-align: right;"><?= number_format($item['tmpprv'], 3, '.', '') ?></td>
-                      <td style="text-align: right;"><?= number_format($item['qtdprv'], 3, ',', '.') ?></td>
-                      <td style="text-align: right;"><?= number_format($item['qtduti'], 3, ',', '.') ?></td>
-                      <td><?= $item['codccu'] ?></td>
+      </h5>
+      <?php foreach ($agrupadoMvto as $numorp): ?>
+        <?php if (count($numorp) > 0) : ?>
+          <div class="card-body">
+            <h5 class="card-header bg-primary text-white">
+              O.P.: <?= $numorp['master'][0]['numorp'] ?> ||
+              Produto: <?= $numorp['master'][0]['codpro'] ?> - <?= $numorp['master'][0]['Produto'] ?> || <br>
+              Qtde. Prod.: <?= number_format($numorp['master'][0]['QtdeProd'], 3, ',', '.') ?> ||
+              C.Custo: <?= $numorp['master'][0]['codccu'] ?>
+            </h5>
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="card-header bg-primary text-white">
+                  Componentes da O.P.
+                </h6>
+                <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
+                  <thead>
+                    <tr class="table-primary">
+                      <th scope="col">Cod. Comp.</th>
+                      <th scope="col">Descição Componente</th>
+                      <th scope="col">Dt. Ger.</th>
+                      <th scope="col">Tempo Prod.</th>
+                      <th scope="col">Qtde. Comp.</th>
+                      <th scope="col">Qtde. Ut.</th>
+                      <th scope="col">C. Custo</th>
                     </tr>
-                  <?php endforeach; ?>
-                </tbody>
-              </table>
-            </div>
-            <div class="col-md-6">
-              <h6 class="card-header bg-primary text-white">
-                Movimentação de Estoque
-              </h6>
-              <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
-                <thead>
-                  <tr class="table-primary">
-                    <th scope="col">Cod. Dep.</th>
-                    <th scope="col">Cod. Prod.</th>
-                    <th scope="col">Descição</th>
-                    <!-- <th scope="col">Cod. Tns.</th> -->
-                    <th scope="col">Tipo - U.M.</th>
-                    <th scope="col">Qtde. Mov.</th>
-                    <th scope="col">Vlr. Mov.</th>
-                    <th scope="col">C. Custo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php foreach ($mvItens as $mv): ?>
-                    <?php if ($mv['Tipo'] === 'E') continue; ?>
-                    <tr>
-                      <td><?= $mv['Deposito'] ?></td>
-                      <td><?= $mv['codpro'] ?></td>
-                      <td><?= $mv['DescrFis'] ?></td>
-                      <!-- <td><?= $mv['Transacao'] ?></td> -->
-                      <td><?= $mv['Tipo'] ?> -> <?= $mv['UM'] ?></td>
-                      <td style="text-align: right;"><?= number_format($mv['QtdeMovi'], 3, '.', '') ?></td>
-                      <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($mv['VlrMov'], 2, ',', '.') ?></td>
-                      <td><?= $mv['codccu'] ?></td>
-                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($numorp['master'] as $key): ?>
 
-                  <?php endforeach; ?>
-                </tbody>
-              </table>
+                      <tr>
+                        <td><?= $key['codcmp'] ?></td>
+                        <td><?= $key['despro'] ?></td>
+                        <td><?= date('d/m/Y', strtotime($key['datger'])) ?></td>
+                        <td style="text-align: right;"><?= number_format($key['tmpprv'], 3, '.', '') ?></td>
+                        <td style="text-align: right;"><?= number_format($key['qtdprv'], 3, ',', '.') ?></td>
+                        <td style="text-align: right;"><?= number_format($key['qtduti'], 3, ',', '.') ?></td>
+                        <td><?= $key['codccu'] ?></td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+              <div class="col-md-6">
+                <h6 class="card-header bg-primary text-white">
+                  Movimentação de Estoque
+                </h6>
+                <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
+                  <thead>
+                    <tr class="table-primary">
+                      <th scope="col">Cod. Dep.</th>
+                      <th scope="col">Cod. Prod.</th>
+                      <th scope="col">Descição</th>
+                      <th scope="col">Tipo - U.M.</th>
+                      <th scope="col">Qtde. Mov.</th>
+                      <th scope="col">Vlr. Mov.</th>
+                      <th scope="col">C. Custo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($numorp['movimento'] as $mv):  ?>
+                      <?php if ($mv['Tipo'] == 'S') : ?>
+                        <tr>
+                          <td><?= $mv['Deposito'] ?></td>
+                          <td><?= $mv['codpro'] ?></td>
+                          <td><?= $mv['DescrFis'] ?></td>
+                          <td><?= $mv['Tipo'] ?> -> <?= $mv['UM'] ?></td>
+                          <td style="text-align: right;"><?= number_format($mv['QtdeMovi'], 3, '.', '') ?></td>
+                          <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($mv['VlrMov'], 2, ',', '.') ?></td>
+                          <td><?= $mv['codccu'] ?></td>
+                        </tr>
+                      <?php endif; ?>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <span class="badge <?= $correto ? 'bg-primary' : 'bg-danger' ?>">
-              <?= $correto ? 'Correto' : 'Errado' ?>
-            </span>
           </div>
-        </div>
+        <?php else: ?>
+          <h1> Nenhum resultado encontrado</h1>
+
+        <?php endif; ?>
       <?php endforeach; ?>
     </div>
   </div>
