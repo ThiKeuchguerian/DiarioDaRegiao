@@ -56,7 +56,7 @@ class CentroCustoOrdermProducao
   public function movimentoEstoque($numDoc): array
   {
     $sql =
-      " SELECT CONCAT(M.numdoc, '-', M.oriorp) AS ChaveAgrup, CONCAT(M.numdoc, '-', M.codpro) AS ChaveVerif,
+      " SELECT CONCAT(M.numdoc, '-', M.oriorp) AS ChaveAgrup, 
           M.coddep AS Deposito, M.numdoc AS NumDoc, M.codpro, P.despro AS DescrFis,  M.oriorp,
           P.codfam AS Familia, M.codtns AS Transacao, M.seqmov AS Seq, P.unimed AS UM, M.esteos AS Tipo, U.r910usu_nomcom,
           M.qtdest AS QtdeEst, M.vlrmov AS VlrMov, M.vlrest AS VlrEst, M.qtdmov AS QtdeMovi, M.PRMEST AS PreMed, M.datdig AS DtDigitada, M.datmov AS DtMovimento,
@@ -99,7 +99,7 @@ class CentroCustoOrdermProducao
   public function consultaOrdemProducao($numDoc): array
   {
     $sql =
-      "SELECT CONCAT(cop.numorp, '-', cop.codfam) as ChaveAgrup, CONCAT(cop.numorp, '-', cmo.codcmp) AS ChaveVerif,
+      "SELECT CONCAT(cop.numorp, '-', cop.codfam) as ChaveAgrup,
           cop.numorp, cop.codfam, cop.codpro, prd.despro AS Produto, cop.tmpprv, cop.qtdprv AS QtdeProd,
           cmo.codcmp, pro.despro, cmo.qtdprv, cmo.qtduti, cmo.codccu, cop.codori, cop.datger
         FROM e900cop cop
