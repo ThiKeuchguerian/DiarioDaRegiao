@@ -196,6 +196,41 @@
       /* Texto menor, opcional */
       cursor: default;
     }
+
+    /* Estilos utilizados em Demonsrativo de Apuração de Contribuições */
+    .section-title {
+      background-color: var(--bs-primary);
+      color: white;
+      padding: 5px;
+      font-weight: bold;
+    }
+
+    .sub-section-title {
+      background-color: var(--bs-primary);
+      color:white;
+      font-weight: bold;
+      padding-left: 11px;
+      padding: 3px;
+    }
+
+    .bg-yellow {
+      background-color:rgb(243, 216, 134);
+    }
+
+    .bg-orange {
+      background-color:rgb(214, 155, 115);
+    }
+
+    .value {
+      text-align: right;
+    }
+
+    .border-box {
+      border: 1px solid #ccc;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 
