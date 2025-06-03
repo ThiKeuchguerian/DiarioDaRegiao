@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . 'ti/../classes/DBConnect.php';
 require_once __DIR__ . '/../classes/Functions/ALTERAR.php';
 
 $Titulo = 'ALTERAR';
@@ -71,6 +70,7 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Espaço entre o menu e o resultado -->
 <div class="mb-3"></div>
 
+<!-- Inclui JavaScript -->
 <script src="<?= URL_PRINCIPAL ?>js/maskcampos.js"></script>
 <script src="<?= URL_PRINCIPAL ?>js/exibirtabela.js"></script>
 
