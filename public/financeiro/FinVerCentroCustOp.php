@@ -65,18 +65,16 @@ if (isset($_POST['btn-buscar'])) {
       }
     }
   }
-  foreach ($agrupadoMvto as $numorp) {
-    $status = true;
-    $statusOk = 0;
-    $statusXX = 0;
-    if ($numorp['master'][0]['codccu'] === $numorp['movimento'][0]['codccu']) {
-      $status = true;
-      $statusOk++;
-    } else {
-      $status = false;
-      $statusXX++;
-    }
-  }
+  // Contar quantos são IGUAIS
+
+  $iguais = count(array_filter($agrupadoMvto, function ($item) {
+    return $item['master'][0]['codccu'] == $item['movimento'][0]['codccu'];
+  }));
+
+  // Contar quantos são DIFERENTES
+  $diferentes = count(array_filter($agrupadoMvto, function ($item) {
+    return $item['master'][0]['codccu'] != $item['movimento'][0]['codccu'];
+  }));
 }
 
 
@@ -129,9 +127,9 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card shadow-sm ">
       <h5 class="card-header bg-primary text-white">
         <?php if ($mesAno <> '') : ?>
-          Em <?= $mesAno ?> || Qtde. O.P.: <?= $dados ?> || 
-          Qtde. O.P. com C.Custo OK: <?= $statusOk ?> ||
-          Qtde. O.P. com C.Custo XX: <?= $statusXX ?>
+          Em <?= $mesAno ?> || Qtde. O.P.: <?= $dados ?> ||
+          Qtde. O.P. com C.Custo OK: <?= $iguais ?> ||
+          Qtde. O.P. com C.Custo XX: <?= $diferentes ?> ||
         <?php else : ?>
           O.P. Nº: <?= $numDoc ?> || Qtde. O.P.: <?= $dados ?>
         <?php endif; ?>
@@ -145,11 +143,11 @@ require_once __DIR__ . '/../includes/header.php';
               Qtde. Prod.: <?= number_format($numorp['master'][0]['QtdeProd'], 3, ',', '.') ?> ||
               C.Custo OP: <?= $numorp['master'][0]['codccu'] ?> ||
               C.Custo Mov.: <?= $numorp['movimento'][0]['codccu'] ?> ||
-              Status:<?php if ($status) : ?>
-              <span class="badge bg-success">OK</span>
-            <?php else : ?>
-              <span class="badge bg-danger">XX</span>
-            <?php endif; ?>
+              <?php if ($numorp['master'][0]['codccu'] == $numorp['movimento'][0]['codccu']) : ?>
+                <span class="badge bg-success">OK</span>
+              <?php else : ?>
+                <span class="badge bg-danger">XX</span>
+              <?php endif; ?>
             </h5>
             <div class="row">
               <div class="col-md-6">
@@ -170,7 +168,6 @@ require_once __DIR__ . '/../includes/header.php';
                   </thead>
                   <tbody>
                     <?php foreach ($numorp['master'] as $key): ?>
-
                       <tr>
                         <td><?= $key['codcmp'] ?></td>
                         <td><?= $key['despro'] ?></td>
@@ -191,10 +188,10 @@ require_once __DIR__ . '/../includes/header.php';
                 <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
                   <thead>
                     <tr class="table-primary">
-                      <th scope="col">Cod. Dep.</th>
                       <th scope="col">Cod. Prod.</th>
                       <th scope="col">Descição</th>
                       <th scope="col">Tipo - U.M.</th>
+                      <th scope="col">Dt. Mov.</th>
                       <th scope="col">Qtde. Mov.</th>
                       <th scope="col">Vlr. Mov.</th>
                       <th scope="col">C. Custo</th>
@@ -204,10 +201,10 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php foreach ($numorp['movimento'] as $mv):  ?>
                       <?php if ($mv['Tipo'] == 'S') : ?>
                         <tr>
-                          <td><?= $mv['Deposito'] ?></td>
                           <td><?= $mv['codpro'] ?></td>
                           <td><?= $mv['DescrFis'] ?></td>
                           <td><?= $mv['Tipo'] ?> -> <?= $mv['UM'] ?></td>
+                          <td><?= date('d/m/Y', strtotime($mv['DtMovimento'])) ?></td>
                           <td style="text-align: right;"><?= number_format($mv['QtdeMovi'], 3, '.', '') ?></td>
                           <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($mv['VlrMov'], 2, ',', '.') ?></td>
                           <td><?= $mv['codccu'] ?></td>
@@ -221,7 +218,6 @@ require_once __DIR__ . '/../includes/header.php';
           </div>
         <?php else: ?>
           <h1> Nenhum resultado encontrado</h1>
-
         <?php endif; ?>
       <?php endforeach; ?>
     </div>
