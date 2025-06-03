@@ -1,6 +1,7 @@
 <div class="row">
   <div class="col">
     <a href="contabil/ContRecOperacionais.php" class="btn btn-primary btn-sm" style="color: white;">Apuração Contribuições - Diário</a>
+    <a href="contabil/ContApuracaoContribuicoes.php" class="btn btn-primary btn-sm" style="color: white;">Demonstrativo de Apuração das Contribuições</a>
     <a href="contabil/ContConsultaOutrosDoc.php" class="btn btn-primary btn-sm" style="color: white;">Consulta Outros Documentos</a>
     <div class="mb-3"></div>
     <a href="contabil/ContApuracaoNfEntrada.php" class="btn btn-primary btn-sm" style="color: white;">Contabilização - Nota Entrada</a>
