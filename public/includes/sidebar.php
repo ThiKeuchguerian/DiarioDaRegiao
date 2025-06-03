@@ -17,7 +17,7 @@ $menuItems = [
 ];
 
 // atributos comuns de link
-$linkAttrs = 'class="nav-link align-middle px-1.5" style="color: white;" href="#"';
+$linkAttrs = 'class="nav-link align-middle px-1.0" style="color: white;" href="#"';
 
 ?>
 
