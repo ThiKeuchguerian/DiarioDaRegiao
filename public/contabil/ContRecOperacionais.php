@@ -10,12 +10,9 @@ $ContabilRecOperacionais = new ContabilRecOperacionais();
 
 if (isset($_POST['btn-buscar'])) {
   $mesAno = $_POST['MesAno'] ?? date('m/Y');
-  $Consultas = $ContabilRecOperacionais->gerarRelatorio($mesAno);
-  // $Consultas[''];
-  // echo "<pre>";
-  // // var_dump($mesAno);
-  // var_dump($Consultas);
-  // die();
+
+  $Consultas = $ContabilRecOperacionais->gerarRelatorio($mesAno, []);
+  
   $ResultComun = $Consultas['mesComunicacao'];
   $TotalI = count($ResultComun);
   $ResultOutDoc = $Consultas['outrosDocumentos'];
@@ -56,8 +53,8 @@ require_once __DIR__ . '/../includes/header.php';
                 $currentMonth = date('m');
                 $currentYear = date('Y');
 
-                // Loop pelos 12 meses anteriores
-                for ($i = 0; $i < 12; $i++) {
+                // Loop pelos 24 meses anteriores
+                for ($i = 0; $i < 24; $i++) {
                   $mesAno = date('m/Y', strtotime("-$i month", strtotime("$currentYear-$currentMonth-01")));
                   $selected = ($mesAno == $MesAnoSelecionado) ? 'selected' : '';
                   echo "<option value=\"$mesAno\" $selected>$mesAno</option>";
