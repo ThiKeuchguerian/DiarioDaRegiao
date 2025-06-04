@@ -23,28 +23,40 @@ class ContabilRecOperacionais
     }
     $primeiro = $data->format('Ym01');               // YYYY-mm-01
     $ultimo    = $data->modify('last day of this month')->format('Ymd');
-    // echo "<pre>";
-    // var_dump($primeiro, $ultimo);
-    // die();
     return [$primeiro, $ultimo];
   }
 
   /**
    * Método público que dispara todas as consultas e retorna um array com cada resultado
    */
-  public function gerarRelatorio(string $mesAno): array
+  public function gerarRelatorio(string $mesAno, array $filtros): array
   {
     list($primeiroDia, $ultimoDia) = self::obterPrimeiroUltimoDia($mesAno);
 
-    return [
-      'notasParaImportar'   => $this->consultaNotasParaImportar($primeiroDia, $ultimoDia),
-      'mesComunicacao'      => $this->consultaMesComunicacao($primeiroDia, $ultimoDia),
-      'outrosDocumentos'    => $this->consultaOutrosDocumentos($primeiroDia, $ultimoDia),
-      'diferencaItens'      => $this->buscaDiferencaItens($primeiroDia, $ultimoDia),
-      'diferencaOutrosDoc'  => $this->buscaDiferencaOutrosDoc($primeiroDia, $ultimoDia),
-      'mesNotaFat'          => $this->consultaMesNotaFat($primeiroDia, $ultimoDia),
-      'itensNotasFiscais'   => $this->consultaItensNotasFiscais($primeiroDia, $ultimoDia),
+    $todasConsultas = [
+      'notasParaImportar'   => fn() => $this->consultaNotasParaImportar($primeiroDia, $ultimoDia),
+      'mesComunicacao'      => fn() => $this->consultaMesComunicacao($primeiroDia, $ultimoDia),
+      'outrosDocumentos'    => fn() => $this->consultaOutrosDocumentos($primeiroDia, $ultimoDia),
+      'diferencaItens'      => fn() => $this->buscaDiferencaItens($primeiroDia, $ultimoDia),
+      'diferencaOutrosDoc'  => fn() => $this->buscaDiferencaOutrosDoc($primeiroDia, $ultimoDia),
+      'mesNotaFat'          => fn() => $this->consultaMesNotaFat($primeiroDia, $ultimoDia),
+      'itensNotasFiscais'   => fn() => $this->consultaItensNotasFiscais($primeiroDia, $ultimoDia),
     ];
+
+    // Se nenhum filtro for passado, executa todas
+    if (empty($filtros)) {
+      $filtros = array_keys($todasConsultas);
+    }
+
+    $resultado = [];
+
+    foreach ($filtros as $filtro) {
+      if (isset($todasConsultas[$filtro])) {
+        $resultado[$filtro] = $todasConsultas[$filtro]();
+      }
+    }
+
+    return $resultado;
   }
 
   private function consultaNotasParaImportar(string $primeiroDia, string $ultimoDia): array
@@ -464,10 +476,6 @@ class ContabilRecOperacionais
     ";
 
     $stmt = $this->senior->prepare($sql);
-    // echo "<pre>";
-    // var_dump($stmt);
-    // var_dump($primeiroDia, $ultimoDia);
-    // die();
     $stmt->execute([':pd' => $primeiroDia, ':ld' => $ultimoDia]);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
   }
