@@ -1,15 +1,48 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-// require_once __DIR__ . '/../classes/Functions/ALTERAR.php';
+require_once __DIR__ . '/../classes/Functions/ContRecOperacionais.php';
 
 $Titulo = 'Demonstrativo de Apuração das Contribuições: PIS, COFINS E INSS';
 $URL = URL_PRINCIPAL . 'contabil/ContApuracaoContribuicoes.php';
 
 // Instanciar a classe
-// $ClassifCheckMetas = new ClassifCheckMetas();
+$ContabilRecOperacionais = new ContabilRecOperacionais();
+
 
 if (isset($_POST['btn-buscar'])) {
   $mesAno = $_POST['MesAno'];
+
+  $Consultas = $ContabilRecOperacionais->gerarRelatorio($mesAno, ['outrosDocumentos', 'itensNotasFiscais']);
+
+  // Processar dados para exibição
+  $outrosDocumentos = isset($Consultas['outrosDocumentos']) && is_array($Consultas['outrosDocumentos']) ? $Consultas['outrosDocumentos'] : [];
+  $itensNotasFiscais = isset($Consultas['itensNotasFiscais']) && is_array($Consultas['itensNotasFiscais']) ? $Consultas['itensNotasFiscais'] : [];
+
+  // Tipos de serviço a serem exibidos para itensNotasFiscais
+  $tipos = [
+    'Encartes 5949S',
+    'Impressos de Jornais 5101/6101',
+    'Assinaturas de Jornais  5116/5116E',
+    'Vendas Avulsos 5101/5113'
+  ];
+
+  // Filtrar itensNotasFiscais pelos tipos
+  $itensFiltrados = array_filter($itensNotasFiscais, function ($item) use ($tipos) {
+    return in_array($item['TipoServico'], $tipos);
+  });
+
+  // Somar valores
+  $somaVlrVeic = 0;
+  foreach ($outrosDocumentos as $item) {
+    $somaVlrVeic += floatval($item['VlrVeic']);
+  }
+
+  $somaValor = 0;
+  foreach ($itensFiltrados as $item) {
+    $somaValor += floatval($item['Valor']);
+  }
+
+  $total = $somaVlrVeic + $somaValor;
 }
 // Inclui o header da página
 require_once __DIR__ . '/../includes/header.php';
@@ -66,84 +99,44 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="mb-2"></div>
             <div class="section-title">RECEITAS OPERACIONAIS</div>
+            <?php if (!empty($outrosDocumentos)): ?>
+              <?php foreach ($outrosDocumentos as $item): ?>
+                <div class="row">
+                  <div class="col-8"><?= htmlspecialchars($item['TipoServico']) ?></div>
+                  <div class="col-4 value"><?= number_format($item['VlrVeic'], 2, ',', '.') ?></div>
+                </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+            <?php if (!empty($itensFiltrados)): ?>
+              <?php foreach ($itensFiltrados as $item): ?>
+                <div class="row">
+                  <div class="col-8"><?= htmlspecialchars($item['TipoServico']) ?></div>
+                  <div class="col-4 value"><?= number_format($item['Valor'], 2, ',', '.') ?></div>
+                </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+            <div class="mb-2"></div>
             <div class="row">
-              <div class="col-8">Noticiários</div>
-              <div class="col-4 value">6.652,08</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Classificados CM</div>
-              <div class="col-4 value">1.432,15</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Classificados Imóveis</div>
-              <div class="col-4 value">312,00</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Classificados Locação</div>
-              <div class="col-4 value">212,00</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Suplementos 54343</div>
-              <div class="col-4 value">315.00</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Direito Motor</div>
-              <div class="col-4 value">214,00</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Diário Web</div>
-              <div class="col-4 value">217,00</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Publicidades Rádios</div>
-              <div class="col-4 value">210,00</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Publicidades Redes Sociais</div>
-              <div class="col-4 value">350,00</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Assinaturas de Jornais 5101/5101E</div>
-              <div class="col-4 value">317.242,62</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Assinaturas de Jornais 5116/5116E</div>
-              <div class="col-4 value">473.462,20</div>
-            </div>
-            <div class="row">
-              <div class="col-8">Receitas Merc Externo</div>
-              <div class="col-4 value">7.626,90</div>
-            </div>
-            <div class="row">
-              <div class="col-8"><strong>BASE DE CÁLCULO</strong></div>
-              <div class="col-4 value">851.197,48</div>
-            </div>
-            <div class="row mt-2">
-              <div class="col-8">PIS a Pagar Código 8109:</div>
-              <div class="col-4 value">5.381,68</div>
-            </div>
-            <div class="row">
-              <div class="col-8">COFINS a Pagar Código 21:</div>
-              <div class="col-4 value">24.838,52</div>
+              <div class="col-8">BASE DE CÁLCULO</div>
+              <div class="col-4 text-end"><?= number_format($total, 2, ',', '.') ?></div>
             </div>
           </div>
 
           <div class="border-box">
-            <div class="section-title">INSS S/T RECEITA BRUTA</div>
             <div class="row">
-              <div class="col-8">RECEITA OPERACIONAL BRUTA:</div>
-              <div class="col-4 text-end"><span class="value">1.361.283,81</span></div>
+              <div class="col-8">PIS S/ Receitas - Devido</div>
+              <div class="col-4 text-end"><span class="value"><?= number_format(($total * 0.0065), 2, ',', '.') ?></span></div>
             </div>
             <div class="row">
-              <div class="col-8">1,5% INSS S/T RECEITA BRUTA:</div>
-              <div class="col-4 text-end"><span class="value">20.419,31</span></div>
+              <div class="col-8">PIS Retido de Recebimentos</div>
+              <div class="col-4 text-end"><span class="value"></span></div>
             </div>
             <div class="row">
-              <div class="col-8">RECEITA NÃO OPERACIONAL:</div>
+              <div class="col-8">PIS Compensado</div>
               <div class="col-4 text-end"><span class="value">24.895,50</span></div>
             </div>
             <div class="row">
-              <div class="col-8">1,5% INSS S/ OUTRAS RECEITAS:</div>
+              <div class="col-8">Exclusão - Merc Externo</div>
               <div class="col-4 text-end"><span class="value">373,43</span></div>
             </div>
             <div class="row">
@@ -186,11 +179,11 @@ require_once __DIR__ . '/../includes/header.php';
           <div class="border-box">
             <div class="section-title">REGIME NÃO CUMULATIVO</div>
             <div class="row">
-              <div class="col-8">Alíquota PIS:</div>
+              <div class="col-8">Alíquota PIS Código 6912:</div>
               <div class="col-4 text-end">1,65%</div>
             </div>
             <div class="row">
-              <div class="col-8">Alíquota COFINS:</div>
+              <div class="col-8">Alíquota COFINS Código 5856:</div>
               <div class="col-4 text-end">7,60%</div>
             </div>
             <div class="mb-2"></div>
