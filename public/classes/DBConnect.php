@@ -38,6 +38,12 @@ class DatabaseConnection
           $pass = 'G3s10R_LL';
           break;
 
+        case 'gestorTeste':
+          $dsn = "sqlsrv:Server=10.64.0.14,1433;Database=gestor";
+          $user = 'gestor';
+          $pass = 'gestor';
+          break;
+
         case 'totvs':
           $dsn = "sqlsrv:Server=10.64.0.7\MICROSIGA;Database=PROTHEUS";
           $user = 'sa';
