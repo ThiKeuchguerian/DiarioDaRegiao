@@ -25,7 +25,7 @@
     <div class="mb-3"></div>
     <!-- <a href="ComissaoCirculacao.php" class="btn btn-primary btn-sm" style="color: white;"> Comissão Circulação </a> -->
     <div class="mb-3"></div>
-    <!-- <a href="RelacaoCartaoRecorrente.php" class="btn btn-primary btn-sm" style="color: white;"> Relação Cartão Recorrente - Pendentes</a> -->
+    <a href="circulacao/CirRelCarRecPen.php" class="btn btn-primary btn-sm" style="color: white;"> Relação Cartão Recorrente - Pendentes</a>
     <div class="mb-3"></div>
     <!-- <a href="CirulacaoGeraCodigoBarrra.php" class="btn btn-primary btn-sm" style="color: white;"> Boleto com Erro </a> -->
     <!-- <a href="CirculacaoGeraBoleto.php" class="btn btn-primary btn-sm" style="color: white;"> 2º Via Boleto</a> -->
