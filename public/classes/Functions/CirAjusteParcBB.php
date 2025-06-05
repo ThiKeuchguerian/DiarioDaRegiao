@@ -8,7 +8,7 @@ class CirAjusteParcelasBB
 
   public function __construct()
   {
-    $this->gestor = DatabaseConnection::getConnection('gestorTeste');
+    $this->gestor = DatabaseConnection::getConnection('gestor');
   }
 
   private function executeStatement(string $sql, array $params = []): void
