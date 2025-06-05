@@ -13,10 +13,12 @@ define('LOGO',          '/config/../img/logo_write.svg');
 define('FAVICON',       '/config/../img/favicon.ico');
 
 // Função global para depuração
-function depurar($var)
+function depurar(...$vars)
 {
   echo '<pre>';
-  var_dump($var);  
+  foreach ($vars as $var) {
+    var_dump($var);
+  }
   echo '</pre>';
   die();
 }

@@ -129,100 +129,100 @@ require_once __DIR__ . '/../includes/header.php';
     $pivot[$motivo][$mes] += $qtde;
   }
   ?>
-  <div class="container d-flex justify-content-center"">
-    <div class=" col col-sm-8">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <table class="table table-striped table-hover" id="Resultado" name="Resultado">
-          <thead>
-            <tr class="table-primary">
-              <th scope="col">Desc. Motivo Cancelamento</th>
-              <?php foreach ($Meses as $m): ?>
-                <th scope="col" style="text-align: center;"><?= $m ?></th>
-              <?php endforeach; ?>
-              <th scope="col" style="text-align: center;">Total Geral</th>
-            </tr>
-          </thead>
-          <tbody>
-          <tbody>
-            <?php foreach ($pivot as $motivo => $dadosMes): ?>
-              <?php $totalLinha = array_sum($dadosMes); ?>
-              <tr>
-                <td><?= $motivo ?></td>
-                <?php foreach ($Meses as $m): ?>
-                  <td class="text-center"><?= $dadosMes[$m] ?></td>
-                <?php endforeach; ?>
-                <th class="text-center"><?= $totalLinha ?></th>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-          <tbody>
-            <tr class="table-primary">
-              <th scope="row">Total</th>
-              <?php
-              $totaisPorMes = array_fill_keys($Meses, 0);
-              foreach ($pivot as $dadosMes) {
-                foreach ($Meses as $m) {
-                  $totaisPorMes[$m] += $dadosMes[$m];
-                }
-              }
-              $totalGeral = array_sum($totaisPorMes);
-              ?>
-              <?php foreach ($Meses as $m): ?>
-                <th class="text-center"><?= $totaisPorMes[$m] ?></th>
-              <?php endforeach; ?>
-              <th class="text-center"><?= $totalGeral ?></th>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-<?php endif; ?>
-
-<!-- Resultado -->
-<?php if (isset($resultadoAnalitico)) : ?>
   <div class="container d-flex justify-content-center">
-    <div class=" col col-sm-12">
+    <div class=" col col-sm-8">
       <div class="card shadow-sm">
         <div class="card-body">
-          <h5 class="card-header bg-primary text-white">Qtde. Contrato: <?= $Qtde ?></h5>
           <table class="table table-striped table-hover" id="Resultado" name="Resultado">
             <thead>
               <tr class="table-primary">
-                <th scope="col">Contrato</th>
-                <th scope="col">Dt. Assinatura</th>
-                <th scope="col">Nome Cliente</th>
-                <th scope="col">Tipo Cobrança</th>
-                <th scppe="col">Desc. Motivo Cancelamento</th>
-                <th scope="col">Tipo Assinatura</th>
-                <th scope="col">Mês Canc.</th>
+                <th scope="col">Desc. Motivo Cancelamento</th>
+                <?php foreach ($Meses as $m): ?>
+                  <th scope="col" style="text-align: center;"><?= $m ?></th>
+                <?php endforeach; ?>
+                <th scope="col" style="text-align: center;">Total Geral</th>
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($resultadoAnalitico as $key => $item) : ?>
+            <tbody>
+              <?php foreach ($pivot as $motivo => $dadosMes): ?>
+                <?php $totalLinha = array_sum($dadosMes); ?>
                 <tr>
-                  <td><?= $item['numeroDoContrato'] ?></td>
-                  <td><?= date('d/m/Y', strtotime($item['dataDaAssinatura'])) ?></td>
-                  <td><?= $item['nomeRazaoSocial'] ?></td>
-                  <td><?= $item['descricaoTipoCobranca'] ?></td>
-                  <td><?= $item['MotivoCancelamento'] ?></td>
-                  <td><?= $item['descricaoTipoDeAssinatura'] ?></td>
-                  <td><?= $item['MesCanc'] ?></td>
+                  <td><?= $motivo ?></td>
+                  <?php foreach ($Meses as $m): ?>
+                    <td class="text-center"><?= $dadosMes[$m] ?></td>
+                  <?php endforeach; ?>
+                  <th class="text-center"><?= $totalLinha ?></th>
                 </tr>
               <?php endforeach; ?>
+            </tbody>
+            <tbody>
+              <tr class="table-primary">
+                <th scope="row">Total</th>
+                <?php
+                $totaisPorMes = array_fill_keys($Meses, 0);
+                foreach ($pivot as $dadosMes) {
+                  foreach ($Meses as $m) {
+                    $totaisPorMes[$m] += $dadosMes[$m];
+                  }
+                }
+                $totalGeral = array_sum($totaisPorMes);
+                ?>
+                <?php foreach ($Meses as $m): ?>
+                  <th class="text-center"><?= $totaisPorMes[$m] ?></th>
+                <?php endforeach; ?>
+                <th class="text-center"><?= $totalGeral ?></th>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  </div>
-<?php endif; ?>
+  <?php endif; ?>
 
-<!-- Espaço entre o resultado e o footer -->
-<div class="mb-3"></div>
-<!-- JavaScript -->
-<script src="../js/maskcampos.js"></script>
-<script src="../js/ciranalisecancenc.js"></script>
-<!-- Footer -->
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+  <!-- Resultado -->
+  <?php if (isset($resultadoAnalitico)) : ?>
+    <div class="container d-flex justify-content-center">
+      <div class=" col col-sm-12">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-header bg-primary text-white">Qtde. Contrato: <?= $Qtde ?></h5>
+            <table class="table table-striped table-hover" id="Resultado" name="Resultado">
+              <thead>
+                <tr class="table-primary">
+                  <th scope="col">Contrato</th>
+                  <th scope="col">Dt. Assinatura</th>
+                  <th scope="col">Nome Cliente</th>
+                  <th scope="col">Tipo Cobrança</th>
+                  <th scppe="col">Desc. Motivo Cancelamento</th>
+                  <th scope="col">Tipo Assinatura</th>
+                  <th scope="col">Mês Canc.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($resultadoAnalitico as $key => $item) : ?>
+                  <tr>
+                    <td><?= $item['numeroDoContrato'] ?></td>
+                    <td><?= date('d/m/Y', strtotime($item['dataDaAssinatura'])) ?></td>
+                    <td><?= $item['nomeRazaoSocial'] ?></td>
+                    <td><?= $item['descricaoTipoCobranca'] ?></td>
+                    <td><?= $item['MotivoCancelamento'] ?></td>
+                    <td><?= $item['descricaoTipoDeAssinatura'] ?></td>
+                    <td><?= $item['MesCanc'] ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <!-- Espaço entre o resultado e o footer -->
+  <div class="mb-3"></div>
+  <!-- JavaScript -->
+  <script src="../js/maskcampos.js"></script>
+  <script src="../js/ciranalisecancenc.js"></script>
+  <!-- Footer -->
+  <?php require_once __DIR__ . '/../includes/footer.php'; ?>

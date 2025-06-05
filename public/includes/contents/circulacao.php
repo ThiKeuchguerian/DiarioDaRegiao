@@ -17,7 +17,7 @@
     <!-- <a href="RelacaoAssinantesCancelados.php" class="btn btn-primary btn-sm" style="color: white;">Contratos Cancelados - Analítico</a> -->
     <div class="mb-3"></div>
     <!-- <a href="DistribPontosApoio.php" class="btn btn-primary btn-sm" style="color: white;"> Distribuição Pontos Apoio </a> -->
-    <!-- <a href="AjusteParcBB.php" class="btn btn-primary btn-sm" style="color: white;"> Ajustar Parcelas BB </a> -->
+    <a href="circulacao/CirAjusteParcBB.php" class="btn btn-primary btn-sm" style="color: white;"> Ajustar Parcelas BB</a>
     <!-- <a href="ValidadorCPFL.php" class="btn btn-primary btn-sm" style="color: white;"> Validador CPFL </a> -->
     <div class="mb-3"></div>
     <!-- <a href="RelExAssinantes.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Ex-Assinantes </a> -->
