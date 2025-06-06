@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../classes/Functions/CirComissao.php';
 
-$Titulo = 'Vendas por Equipe';
+$Titulo = 'Comissão Dept. Circulação';
 $URL = URL_PRINCIPAL . 'circulacao/CirComissao.php';
 
 // Instanciar a classe
@@ -193,8 +193,7 @@ require_once __DIR__ . '/../includes/header.php';
 <?php endif; ?>
 
 <!-- JavaScript -->
-<script src="../js/cirvendasequipe.js"></script>
-<script src="../js/maskcampos.js"></script>
+<script src="<?= URL_PRINCIPAL ?>js/cir_comissao.js"></script>
 
 <!-- Footer -->
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
