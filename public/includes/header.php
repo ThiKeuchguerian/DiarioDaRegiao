@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <link rel="icon" href="<?= FAVICON ?>" type="image/x-icon">
   <title><?= SITE_TITLE ?></title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -208,18 +208,18 @@
 
     .sub-section-title {
       background-color: var(--bs-primary);
-      color:white;
+      color: white;
       font-weight: bold;
       padding-left: 11px;
       padding: 3px;
     }
 
     .bg-yellow {
-      background-color:rgb(243, 216, 134);
+      background-color: rgb(243, 216, 134);
     }
 
     .bg-orange {
-      background-color:rgb(214, 155, 115);
+      background-color: rgb(214, 155, 115);
     }
 
     .value {

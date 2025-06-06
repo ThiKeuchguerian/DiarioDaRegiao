@@ -28,7 +28,7 @@ class MovimentoEstoque
    */
   public function listarProdutosPorDeposito(string $codDep): array
   {
-    $sql  = 
+    $sql  =
       "SELECT P.CODPRO, P.DESPRO FROM E075PRO P
         INNER JOIN e210est M WITH(NOLOCK) ON P.CODEMP = M.CODEMP AND P.CODPRO  = M.CODPRO
         WHERE M.CODDEP = :codDep
@@ -42,17 +42,17 @@ class MovimentoEstoque
   /**
    * Média histórica de movimentação
    *
-   * @param int|null    $codDep
+   * @param string|null    $codDep
    * @param string|null $dtInicio  formato 'YYYY-MM-DD' ou 'DD/MM/YYYY'
    * @param string|null $dtFim
    * @return array
    */
   public function mediaHistoricoMovimento(
-    ?int    $codDep   = null,
+    ?string $codDep   = null,
     ?string $dtInicio = null,
     ?string $dtFim    = null
   ): array {
-    $sql = 
+    $sql =
       " SELECT M.CODPRO   AS CodPro, P.DESPRO   AS DescPro, AVG(M.QTDMOV) AS QtdeMov, AVG(M.VLRMOV) AS VlrMov, AVG(M.PRMEST) AS PrecoMedio
           FROM E210MVP M
         INNER JOIN E075PRO P ON P.CODEMP = M.CODEMP AND P.CODPRO = M.CODPRO
@@ -69,8 +69,8 @@ class MovimentoEstoque
 
     if ($dtInicio && $dtFim) {
       // normalize date para YYYY-MM-DD
-      $d1 = (new DateTime($dtInicio))->format('Y-m-d');
-      $d2 = (new DateTime($dtFim))->format('Y-m-d');
+      $d1 = (new DateTime($dtInicio))->format('Ymd');
+      $d2 = (new DateTime($dtFim))->format('Ymd');
       $conds[]              = "M.DATMOV BETWEEN :d1 AND :d2";
       $params[':d1']        = $d1;
       $params[':d2']        = $d2;
@@ -91,7 +91,7 @@ class MovimentoEstoque
    * Média analítica de movimentação (mês a mês e diferença)
    */
   public function mediaAnaliticoMovimento(
-    int     $codDep,
+    ?string $codDep,
     ?string $dtInicio = null,
     ?string $dtFim    = null
   ): array {
@@ -112,8 +112,8 @@ class MovimentoEstoque
 
     $params = [':codDep' => $codDep];
     if ($dtInicio && $dtFim) {
-      $d1 = (new DateTime($dtInicio))->format('Y-m-d');
-      $d2 = (new DateTime($dtFim))->format('Y-m-d');
+      $d1 = (new DateTime($dtInicio))->format('Ymd');
+      $d2 = (new DateTime($dtFim))->format('Ymd');
       $sql .= "\n    AND M.DATMOV BETWEEN :d1 AND :d2";
       $params[':d1'] = $d1;
       $params[':d2'] = $d2;
@@ -144,54 +144,56 @@ class MovimentoEstoque
    * Detalhe completo das movimentações de um item
    */
   public function detalheMovimentoItem(
-    int     $codDep,
+    string  $codDep,
     string  $codPro,
     ?string $dtInicio = null,
     ?string $dtFim    = null
   ): array {
-    $sql = "
-          SELECT
-            M.coddep      AS Deposito,
-            M.numdoc      AS NumDoc,
-            M.codpro,
-            P.despro      AS DescrFis,
-            P.codfam      AS Familia,
-            M.codtns      AS Transacao,
-            M.seqmov     AS Seq,
-            P.unimed      AS UM,
-            M.esteos      AS Tipo,
-            U.r910usu_nomcom AS Operador,
-            CAST(M.qtdest AS DECIMAL(10,2)) AS QtdeEst,
-            CAST(M.vlrmov AS DECIMAL(10,2)) AS VlrMov,
-            CAST(M.vlrest AS DECIMAL(10,2)) AS VlrEst,
-            CAST(M.qtdmov AS DECIMAL(10,2)) AS QtdeMovi,
-            CAST(M.PRMEST AS DECIMAL(10,2)) AS PreMed,
-            CONVERT(VARCHAR, M.datdig,103)  AS DtDigitada,
-            CONVERT(VARCHAR, M.datmov,103)  AS DtMovimento
-          FROM E210MVP M
-          JOIN E075PRO P
-            ON P.CODEMP = M.CODEMP AND P.CODPRO = M.CODPRO
-          JOIN EW99USU U
-            ON U.CODEMP = M.CODEMP AND U.r999usu_codusu = M.usurec
-          WHERE M.CODEMP = 1
-            AND M.coddep = :codDep
-            AND M.codpro = :codPro
-        ";
+
+    $sql = 
+      " SELECT
+          M.coddep AS Deposito,
+          M.numdoc AS NumDoc,
+          M.codpro,
+          P.despro AS DescrFis,
+          P.codfam AS Familia,
+          M.codtns AS Transacao,
+          M.seqmov AS Seq,
+          P.unimed AS UM,
+          M.esteos AS Tipo,
+          U.r910usu_nomcom AS Operador,
+          M.qtdest AS QtdeEst,
+          M.vlrmov AS VlrMov,
+          M.vlrest AS VlrEst,
+          M.qtdmov AS QtdeMovi,
+          M.PRMEST AS PreMed,
+          M.datdig AS DtDigitada,
+          M.datmov AS DtMovimento
+        FROM E210MVP M
+        INNER JOIN E070EST E ON E.CODEMP = M.CODEMP AND E.CODFIL = M.FILDEP  
+        INNER JOIN E075PRO P ON P.CODEMP = M.CODEMP AND P.CODPRO = M.CODPRO  
+        LEFT JOIN E000MVI MI ON MI.CODEMP = M.CODEMP  AND MI.CODPRO = M.CODPRO AND MI.CODDER = M.CODDER AND MI.CODDEP = M.CODDEP AND MI.DATMOV = M.DATMOV AND MI.SEQMOV = M.SEQMOV
+        INNER JOIN E075DER D ON D.CODEMP = M.CODEMP AND D.CODPRO = M.CODPRO AND D.CODDER = M.CODDER
+        INNER JOIN EW99USU U ON M.usurec = U.r999usu_codusu
+        WHERE M.CODEMP = 1
+          AND M.coddep = :codDep
+          AND M.codpro = :codPro
+      ";
 
     $params = [
       ':codDep' => $codDep,
       ':codPro' => $codPro
     ];
     if ($dtInicio && $dtFim) {
-      $d1 = (new DateTime($dtInicio))->format('Y-m-d');
-      $d2 = (new DateTime($dtFim))->format('Y-m-d');
+      $d1 = (new DateTime($dtInicio))->format('Ymd');
+      $d2 = (new DateTime($dtFim))->format('Ymd');
       $sql .= "\n  AND M.datmov BETWEEN :d1 AND :d2";
       $params[':d1'] = $d1;
       $params[':d2'] = $d2;
     }
 
     $sql .= "\nORDER BY M.codpro, M.datmov";
-
+    // depurar($sql, $params);
     $stmt = $this->senior->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

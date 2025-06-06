@@ -22,3 +22,15 @@ function depurar(...$vars)
   echo '</pre>';
   die();
 }
+
+// Função global para depurar retornando JSON
+function depurarJson(...$vars)
+{
+  header('Content-Type: application/json');
+  if (count($vars) === 1) {
+    echo json_encode($vars[0], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+  } else {
+    echo json_encode($vars, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+  }
+  die(); // Interrompe a execução após a depuração
+}
