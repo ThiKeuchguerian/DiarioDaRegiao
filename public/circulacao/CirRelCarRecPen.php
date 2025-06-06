@@ -21,7 +21,7 @@ require_once __DIR__ . '/../includes/header.php';
 
 <!-- Menu de navegação -->
 <div class="containers d-flex justify-content-center">
-  <div class="col col-sm-6">
+  <div class="col col-sm-4">
     <div class="card shadow-sm">
       <form action=<?= $URL ?> method="post" id="form" name="form">
         <div class="card-header bg-primary text-white">
