@@ -36,6 +36,16 @@ $(document).ready(function () {
   const btnImprimir = document.getElementById("btn-imprimir");
 
   btnImprimir.addEventListener("click", function () {
+    // Cria ou atualiza o estilo para impressão em paisagem
+    let style = document.getElementById('print-landscape-style');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'print-landscape-style';
+      style.media = 'print';
+      style.innerHTML = '@page { size: landscape; }';
+      document.head.appendChild(style);
+    }
+
     // Esconde o formulário antes de imprimir
     const form = document.querySelector("form");
     if (form) form.style.display = "none";

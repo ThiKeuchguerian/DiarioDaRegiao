@@ -234,7 +234,6 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Linha de separação -->
             <tr class="spacer-row" style="background-color: white; height: 20px;"></tr>
           </tbody>
-          <tbody></tbody>
         </table>
       </div>
     </div>

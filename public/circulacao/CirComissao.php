@@ -29,7 +29,7 @@ if (isset($_POST['btn-buscar'])) {
         'QtdeRen'       => 0,
         'QtdeCan'       => 0,
         'TotalVlrVen'   => 0.0,
-        'TotalVlrRen'   => 0.0,
+        'TotalVlrRec'   => 0.0,
         'dadosCon'      => [],
       ];
       $QtdeVend++;
@@ -43,11 +43,10 @@ if (isset($_POST['btn-buscar'])) {
       $agrupaVen[$codVen]['TotalVlrVen'] += (float)$item['valorTotal'];
     } elseif ($item['Tipo'] === 'R') {
       $agrupaVen[$codVen]['QtdeRen'] += (float)$item['Peso'];
-      $agrupaVen[$codVen]['TotalVlrRen'] += (float)$item['valorTotal'];
+      $agrupaVen[$codVen]['TotalVlrRec'] += (float)$item['valorTotal'];
     } elseif ($item['Tipo'] === 'C') {
       $agrupaVen[$codVen]['QtdeCan'] += (float)$item['Peso'];
-      $agrupaVen[$codVen]['TotalVlrRen'] += (float)$item['valorTotal'];
-    }
+    } 
   }
   uksort($agrupaVen, function ($a, $b) use ($agrupaVen) {
     return strcasecmp($agrupaVen[$a]['NomeVen'], $agrupaVen[$b]['NomeVen']);
@@ -114,9 +113,9 @@ require_once __DIR__ . '/../includes/header.php';
               <tr class="table-primary">
                 <th scope="col">Vendedor</th>
                 <th scope="col" style="text-align: center;">Qtde. Vendas</th>
-                <th scope="col" style="text-align: center;">Qtde. Renov.</th>
                 <th scope="col" style="text-align: center;">Qtde. Canc.</th>
-                <th scope="col" style="text-align: center;">Vlr Total Vendas</th>
+                <th scope="col" style="text-align: center;">Vlr.  Total Vendas</th>
+                <th scope="col" style="text-align: center;">Vlr. Total Recebido</th>
                 <th scope="col" style="text-align: center;">% Comissão</th>
                 <th scope="col" style="text-align: center;">Valor Comissão</th>
               </tr>
@@ -126,11 +125,11 @@ require_once __DIR__ . '/../includes/header.php';
                 <tr>
                   <td><?= $item['NomeVen'] ?></td>
                   <td style="text-align: center;"><?= $item['QtdeVen'] ?></td>
-                  <td style="text-align: center;"><?= $item['QtdeRen'] ?></td>
                   <td style="text-align: center;"><?= $item['QtdeCan'] ?></td>
                   <td style="text-align: right;"><span style="float: left;">R$</span> <?= number_format($item['TotalVlrVen'], 2, ',', '.') ?></th>
+                  <td style="text-align: right;"><span style="float: left;">R$</span> <?= number_format($item['TotalVlrRec'], 2, ',', '.') ?></th>
                   <td style="text-align: center;"><?= $item['PerCom'] ?> %</td>
-                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format(($item['TotalVlrVen'] * '0.125'), 2, ',', '.') ?></th>
+                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format(($item['TotalVlrRec'] * '0.125'), 2, ',', '.') ?></th>
                 </tr>
               <?php endforeach; ?>
             </tbody>

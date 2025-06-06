@@ -144,7 +144,6 @@ require_once __DIR__ . '/../includes/header.php';
               </tr>
             </thead>
             <tbody>
-            <tbody>
               <?php foreach ($pivot as $motivo => $dadosMes): ?>
                 <?php $totalLinha = array_sum($dadosMes); ?>
                 <tr>

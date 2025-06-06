@@ -72,8 +72,6 @@ require_once __DIR__ . '/../includes/header.php';
               </tr>
             <?php endforeach; ?>
           </tbody>
-          <tbody>
-          </tbody>
         </table>
       </div>
     </div>
