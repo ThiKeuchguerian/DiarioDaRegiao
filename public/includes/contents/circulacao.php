@@ -23,7 +23,7 @@
     <!-- <a href="RelExAssinantes.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Ex-Assinantes </a> -->
     <!-- <a href="ConsultaCliGestor.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Cliente Gestor </a> -->
     <div class="mb-3"></div>
-    <!-- <a href="ComissaoCirculacao.php" class="btn btn-primary btn-sm" style="color: white;"> Comissão Circulação </a> -->
+    <a href="circulacao/CirComissao.php" class="btn btn-primary btn-sm" style="color: white;"> Comissão Circulação </a>
     <div class="mb-3"></div>
     <a href="circulacao/CirRelCarRecPen.php" class="btn btn-primary btn-sm" style="color: white;"> Relação Cartão Recorrente - Pendentes</a>
     <div class="mb-3"></div>
