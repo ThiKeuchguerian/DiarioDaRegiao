@@ -32,21 +32,35 @@ if (isset($_POST['btn-buscar'])) {
     $detalheMovimentoitem = $HistoricoMovEst->detalheMovimentoItem($codDep, $codPro, $dtInicio, $dtFim);
     $totalDetalhe = count($detalheMovimentoitem);
   } elseif ($codDep !== '0' && $codPro === '0' && $dtInicio !== '' && $dtFim !== '') {
-    $mediaHistorico = $HistoricoMovEst->mediaHistoricoMovimento($codDep, $codPro, $dtInicio, $dtFim);
-    $totalMediaHistorico = count($mediaHistorico);
+    $mediaHistorico = $HistoricoMovEst->mediaHistoricoMovimento($codDep, $dtInicio, $dtFim);
+    $totalMediaHistorico = COUNT($mediaHistorico);
 
-    $analiticoMediaHistorico = $HistoricoMovEst->mediaAnaliticoMovimento($codDep, $codPro, $dtInicio, $dtFim);
+    $analiticoMediaHistorico = $HistoricoMovEst->mediaAnaliticoMovimento($codDep, $dtInicio, $dtFim);
     $totalAnalitico = count($analiticoMediaHistorico);
     $totalMedia = count($mediaHistorico) + count($analiticoMediaHistorico);
 
-    $Comparacao = 'OK';
-    foreach ($analiticoMediaHistorico as $itens) {
-      if ($itens['CodPro'] === $item['CodPro']) {
-        if (abs($itens['DiferencaPreco']) > ($item['PrecoMedio'] * 0.10)) {
-          $Comparacao = 'X';
-          break;
+    $produtosComComparacao = [];
+    $qtdeDif = 0;
+
+    foreach ($mediaHistorico as $item) {
+      $codPro = $item['CodPro'];
+      $comparacao = 'OK';
+      $detalhes = [];
+
+      foreach ($analiticoMediaHistorico as $itens) {
+        if ($itens['CodPro'] === $codPro) {
+          $detalhes[] = $itens;
+          if (abs($itens['DiferencaPreco'] > ($item['PrecoMedio'] * 0.10))) {
+            $comparacao = 'X';
+            $qtdeDif++;
+          }
         }
       }
+      $produtosComComparacao[] = [
+        'produto' => $item,
+        'comparacao' => $comparacao,
+        'detalhes' => $detalhes
+      ];
     }
   }
 }
@@ -55,7 +69,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Menu de navegação -->
-<div class="containers d-flex justify-content-center">
+<div class="containers d-flex justify-content-center filter-fields">
   <div class="col col-sm-6">
     <div class="card shadow-sm">
       <form action=<?= $URL ?> method="post" id="form" name="form">
@@ -174,8 +188,9 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card shadow-sm h-100">
       <h5 class="card-header bg-primary text-white">
         Qtde. Itens: <?= $totalMediaHistorico ?> ||
-        Deposito: <?= $CodDep ?> ||
-        Período: <?= date('d/m/Y', strtotime($DtInicio)) ?> - <?= date('d/m/Y', strtotime($DtFim)) ?>
+        Deposito: <?= $codDep ?> ||
+        Período: <?= date('d/m/Y', strtotime($dtInicio)) ?> - <?= date('d/m/Y', strtotime($dtFim)) ?> ||
+        Qtde. Itens com Dif.: <?= $qtdeDif ?>
       </h5>
       <div class="card-body">
         <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
@@ -189,40 +204,49 @@ require_once __DIR__ . '/../includes/header.php';
               <th scope="col">Diferença</th>
             </tr>
           </thead>
-          <?php foreach ($mediaHistorico as $item): ?>
+          <?php foreach ($produtosComComparacao as $dados): ?>
+            <?php $item = $dados['produto']; ?>
             <tbody>
               <tr class="summary-row" data-CodPro="<?= $item['CodPro'] ?>" onclick="toggleDetails('<?= $item['CodPro'] ?>')">
                 <th><?= $item['CodPro'] ?></th>
                 <th><?= $item['DescPro'] ?></th>
-                <th><?= number_format($item['QtdeMov'], 2, ',', '.') ?></th>
-                <th>R$ <?= number_format($item['VlrMov'], 2, ',', '.') ?></th>
-                <th>R$ <?= number_format($item['PrecoMedio'], 2, ',', '.') ?></th>
-                <th>
-                  <?php
-                  if ($Comparacao === 'OK') {
-                    echo " ";
-                  } else {
-                    echo "<span class='badge bg-danger text-white font-weight-bold'>*****</span>";
-                  }
-                  ?>
+                <th style="text-align: right;"><?= number_format($item['QtdeMov'], 2, ',', '.') ?></th>
+                <th style="text-align: right;"><span style="float: left;">R$</span> <?= number_format($item['VlrMov'], 2, ',', '.') ?></th>
+                <th style="text-align: right;"><span style="float: left;">R$</span> <?= number_format($item['PrecoMedio'], 2, ',', '.') ?></th>
+                <th style="text-align: center;">
+                  <?php if ($dados['comparacao'] === 'X'): ?>
+                    <span class='badge bg-danger text-white font-weight-bold'>*****</span>
+                  <?php else: ?>
+                    &nbsp;
+                  <?php endif; ?>
                 </th>
               </tr>
             </tbody>
-            <fbody>
-              <?php foreach ($analiticoMediaHistorico as $itens): ?>
-                <?php if ($itens['CodPro'] === $item['CodPro']) : ?>
-                  <?php $rowClass = ($itens['DiferencaPreco'] > 10 || $itens['DiferencaPreco'] < -10) ? 'class="detail-row hidden bg-danger text-white font-weight-bold"' : 'class="detail-row hidden"'; ?>
-                  <tr <?= $rowClass ?> data-CodPro="<?= $itens['CodPro'] ?>">
-                    <td colspan="2" class="align-right"><?= $itens['DtMov'] ?></td>
-                    <td><?= number_format($itens['QtdeMov'], 2, ',', '.') ?></td>
-                    <td>R$ <?= number_format($itens['VlrMov'], 2, ',', '.') ?></td>
-                    <td>R$ <?= number_format($itens['PrecoMedio'], 2, ',', '.') ?></td>
-                    <td>R$ <?= number_format($itens['DiferencaPreco'], 2, ',', '.') ?></td>
-                  </tr>
-                <?php endif; ?>
+            <thead class="detail-row hidden" data-CodPro="<?= $item['CodPro'] ?>">
+              <tr class="table-primary text-white">
+                <th colspan="2" style="text-align: center;">Data Movimento</th>
+                <th>Qtde. Movimentada</th>
+                <th>Valor Movimentado</th>
+                <th>Preço Médio</th>
+                <th>Diferença Preço</th>
+              </tr>
+            </thead>
+            <tbody class="detail-row hidden" data-CodPro="<?= $item['CodPro'] ?>">
+              <?php foreach ($dados['detalhes'] as $itens): ?>
+                <?php
+                $diferenca = (float)$itens['DiferencaPreco'];
+                $rowClass = (abs($diferenca) > 10) ? 'class="bg-danger text-white font-weight-bold"' : '';
+                ?>
+                <tr <?= $rowClass ?>>
+                  <td colspan="2" style="text-align: center;"><?= date('d/m/Y', strtotime($itens['DtMov'])) ?></td>
+                  <td style="text-align: right;"><?= number_format($itens['QtdeMov'], 2, ',', '.') ?></td>
+                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($itens['VlrMov'], 2, ',', '.') ?></td>
+                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($itens['PrecoMedio'], 2, ',', '.') ?></td>
+                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($itens['DiferencaPreco'], 2, ',', '.') ?></td>
+                </tr>
               <?php endforeach; ?>
-              <ftbody>
-              <?php endforeach; ?>
+            </tbody>
+          <?php endforeach; ?>
         </table>
       </div>
     </div>

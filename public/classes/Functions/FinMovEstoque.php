@@ -53,9 +53,12 @@ class MovimentoEstoque
     ?string $dtFim    = null
   ): array {
     $sql =
-      " SELECT M.CODPRO   AS CodPro, P.DESPRO   AS DescPro, AVG(M.QTDMOV) AS QtdeMov, AVG(M.VLRMOV) AS VlrMov, AVG(M.PRMEST) AS PrecoMedio
+      " SELECT M.CODPRO AS CodPro, P.DESPRO   AS DescPro, AVG(M.QTDMOV) AS QtdeMov, AVG(M.VLRMOV) AS VlrMov, AVG(M.PRMEST) AS PrecoMedio
           FROM E210MVP M
-        INNER JOIN E075PRO P ON P.CODEMP = M.CODEMP AND P.CODPRO = M.CODPRO
+        INNER JOIN E070EST E ON ((E.CODEMP = M.CODEMP) AND (E.CODFIL = M.FILDEP))
+        INNER JOIN E075PRO P ON ((P.CODEMP=M.CODEMP) AND (P.CODPRO=M.CODPRO))
+        LEFT JOIN E000MVI MI ON ((MI.CODEMP=M.CODEMP)  AND (MI.CODPRO = M.CODPRO) AND (MI.CODDER = M.CODDER) AND (MI.CODDEP = M.CODDEP) AND (MI.DATMOV = M.DATMOV)   AND (MI.SEQMOV = M.SEQMOV))
+        INNER JOIN E075DER D ON ((D.CODEMP=M.CODEMP) AND (D.CODPRO=M.CODPRO) AND (D.CODDER=M.CODDER)) 
         WHERE M.CODEMP = 1 AND M.ESTMOV IN ('NO','NB','NR')
       ";
 
@@ -79,7 +82,7 @@ class MovimentoEstoque
     if (count($conds)) {
       $sql .= "\n  AND " . implode("\n  AND ", $conds);
     }
-
+    
     $sql .= "\n  GROUP BY M.CODPRO, P.DESPRO ORDER BY M.CODPRO";
 
     $stmt = $this->senior->prepare($sql);
@@ -90,51 +93,49 @@ class MovimentoEstoque
   /**
    * Média analítica de movimentação (mês a mês e diferença)
    */
-  public function mediaAnaliticoMovimento(
-    ?string $codDep,
-    ?string $dtInicio = null,
-    ?string $dtFim    = null
-  ): array {
-    $sql = "
-          WITH Mov AS (
-            SELECT
-              M.CODPRO, P.DESPRO, M.DATMOV,
-              AVG(M.QTDMOV) OVER (PARTITION BY M.CODPRO,M.DATMOV)    AS QtdeMov,
-              AVG(M.VLRMOV) OVER (PARTITION BY M.CODPRO,M.DATMOV)    AS VlrMov,
-              AVG(M.PRMEST) OVER (PARTITION BY M.CODPRO,M.DATMOV)   AS PrecoMedio
-            FROM E210MVP M
-            JOIN E075PRO P
-              ON P.CODEMP = M.CODEMP AND P.CODPRO = M.CODPRO
-            WHERE M.CODEMP = 1
-              AND M.CODDEP  = :codDep
-              AND M.ESTMOV IN('NO','NB','NR')
-        ";
+  public function mediaAnaliticoMovimento(?string $codDep, string $dtInicio, string $dtFim): array
+  {
+    $sql =
+      "SELECT M.CODPRO AS CodPro, P.DESPRO AS DesPro, M.DATMOV AS DtMov,
+          AVG(M.QTDMOV) AS QtdeMov,
+          AVG(M.VLRMOV) AS VlrMov,
+          AVG(M.PRMEST) AS PrecoMedio,
+          CASE
+            WHEN 
+              CAST(
+              CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2)) - 
+              LAG(CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2))) OVER (
+                PARTITION BY M.CODPRO 
+                ORDER BY M.DATMOV
+              ) AS DECIMAL(10, 2)
+              ) IS NULL THEN '0.00'
+            ELSE CAST(
+              CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2)) - 
+              LAG(CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2))) OVER (
+                PARTITION BY M.CODPRO 
+                ORDER BY M.DATMOV
+              ) AS DECIMAL(10, 2)
+            )
+          END AS DiferencaPreco
+        FROM E210MVP M
+        INNER JOIN E070EST E ON ((E.CODEMP = M.CODEMP) AND (E.CODFIL = M.FILDEP))   
+        INNER JOIN E075PRO P ON ((P.CODEMP=M.CODEMP) AND (P.CODPRO=M.CODPRO))   
+        LEFT JOIN E000MVI MI ON ((MI.CODEMP=M.CODEMP)  AND (MI.CODPRO = M.CODPRO) AND (MI.CODDER = M.CODDER) AND (MI.CODDEP = M.CODDEP) AND (MI.DATMOV = M.DATMOV)   AND (MI.SEQMOV = M.SEQMOV))
+        INNER JOIN E075DER D ON ((D.CODEMP=M.CODEMP) AND (D.CODPRO=M.CODPRO) AND (D.CODDER=M.CODDER)) 
+        WHERE M.CODEMP = 1 AND M.CODDEP  = :codDep AND M.ESTMOV IN('NO','NB','NR')
+      ";
 
     $params = [':codDep' => $codDep];
-    if ($dtInicio && $dtFim) {
+    if ($dtInicio <> '' && $dtFim <> '') {
       $d1 = (new DateTime($dtInicio))->format('Ymd');
       $d2 = (new DateTime($dtFim))->format('Ymd');
-      $sql .= "\n    AND M.DATMOV BETWEEN :d1 AND :d2";
+      $sql .= "\n AND M.DATMOV BETWEEN :d1 AND :d2";
       $params[':d1'] = $d1;
       $params[':d2'] = $d2;
     }
 
-    $sql .= "
-          ),
-          Analit AS (
-            SELECT
-              CODPRO, DESPRO, DATMOV,
-              QtdeMov, VlrMov, PrecoMedio,
-              PrecoMedio
-               - LAG(PrecoMedio) OVER (PARTITION BY CODPRO ORDER BY DATMOV)
-              AS Diferenca
-            FROM Mov
-          )
-          SELECT *
-            FROM Analit
-           ORDER BY CODPRO, DATMOV
-        ";
-
+    $sql .= "\n  GROUP BY M.CODPRO, P.DESPRO, M.DATMOV ORDER BY M.CODPRO, M.DATMOV";
+    
     $stmt = $this->senior->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -150,7 +151,7 @@ class MovimentoEstoque
     ?string $dtFim    = null
   ): array {
 
-    $sql = 
+    $sql =
       " SELECT
           M.coddep AS Deposito,
           M.numdoc AS NumDoc,
@@ -192,7 +193,7 @@ class MovimentoEstoque
       $params[':d2'] = $d2;
     }
 
-    $sql .= "\nORDER BY M.codpro, M.datmov";
+    $sql .= "\n ORDER BY M.codpro, M.datmov";
     // depurar($sql, $params);
     $stmt = $this->senior->prepare($sql);
     $stmt->execute($params);
