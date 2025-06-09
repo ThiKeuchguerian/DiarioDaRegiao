@@ -7,7 +7,7 @@
     <a href="financeiro/FinMovEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque </a>
     <a href="financeiro/FinMovEstoqueDif.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque Com Diferença </a>
     <div class="mb-3"></div>
-    <!-- <a href="ConsultaEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Estoque (Qtde/Preço Medio/Vlr. Est) </a> -->
+    <a href="financeiro/FinConEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Estoque (Qtde/Preço Medio/Vlr. Est) </a>
     <!-- <a href="FinanceiroConsultaEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Estoque (Entrada/Saída) </a> -->
     <div class="mb-3"></div>
     <!-- <a href="FinanceiroFatContaFin.php" class="btn btn-primary btn-sm" style="color: white;"> Faturamento - Conta Financeira </a> -->
