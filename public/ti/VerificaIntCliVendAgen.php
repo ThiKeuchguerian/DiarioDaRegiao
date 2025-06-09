@@ -85,7 +85,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Menu de navegação -->
-<div class="containers d-flex justify-content-center">
+<div class="containers d-flex justify-content-center filter-fields">
   <div class="col-12 col-sm-3 mx-auto">
     <div class="card shadow-sm h-100">
       <form method="post" id="formTipoIntegracao" name="formTipoIntegracao">

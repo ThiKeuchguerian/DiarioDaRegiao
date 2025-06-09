@@ -21,7 +21,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Menu de navegação -->
-<div class="containers d-flex justify-content-center">
+<div class="containers d-flex justify-content-center filter-fields">
   <div class="col col-sm-8">
     <div class="card shadow-sm">
       <form action=<?= $URL ?> method="post" id="CheckMetas" name="CheckMetas">

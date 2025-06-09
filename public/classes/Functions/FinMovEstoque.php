@@ -82,9 +82,9 @@ class MovimentoEstoque
     if (count($conds)) {
       $sql .= "\n  AND " . implode("\n  AND ", $conds);
     }
-    
-    $sql .= "\n  GROUP BY M.CODPRO, P.DESPRO ORDER BY M.CODPRO";
 
+    $sql .= "\n  GROUP BY M.CODPRO, P.DESPRO ORDER BY M.CODPRO";
+    
     $stmt = $this->senior->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -135,7 +135,7 @@ class MovimentoEstoque
     }
 
     $sql .= "\n  GROUP BY M.CODPRO, P.DESPRO, M.DATMOV ORDER BY M.CODPRO, M.DATMOV";
-    
+
     $stmt = $this->senior->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

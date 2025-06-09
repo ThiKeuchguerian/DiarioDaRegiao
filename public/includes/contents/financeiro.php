@@ -5,7 +5,7 @@
     <a href="financeiro/FinVerCentroCustOp.php" class="btn btn-primary btn-sm" style="color: white;"> Verifica Centro Custo/Ordem Prod. </a>
     <div class="mb-3"></div>
     <a href="financeiro/FinMovEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque </a>
-    <!-- <a href="MovimentacaoEstoqueDiferenca.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque Com Diferença </a> -->
+    <a href="financeiro/FinMovEstoqueDif.php" class="btn btn-primary btn-sm" style="color: white;"> Histórico Movimento Estoque Com Diferença </a>
     <div class="mb-3"></div>
     <!-- <a href="ConsultaEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Estoque (Qtde/Preço Medio/Vlr. Est) </a> -->
     <!-- <a href="FinanceiroConsultaEstoque.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Estoque (Entrada/Saída) </a> -->
