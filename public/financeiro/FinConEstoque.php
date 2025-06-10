@@ -12,7 +12,6 @@ $DadosDeposito = $ConsultaEstoque->listarDepositos();
 // Verifica se a requisição é AJAX
 if (isset($_GET['action']) && $_GET['action'] === 'getFamilia') {
   header('Content-Type: application/json; charset=utf-8');
-
   $codDep  = $_GET['CODDEP'];
   $Familia = $ConsultaEstoque->listarFamlia($codDep);
   echo json_encode($Familia);
@@ -23,10 +22,38 @@ if (isset($_POST['btn-buscar'])) {
   $codDep = $_POST['Deposito'];
   $codFam = $_POST['Familia'];
   $mesAno = $_POST['MesAno'];
+  $mesCampos = [
+    ['QTDEST1', 'PRMEST1', 'VLREST1'],
+    ['QTDEST2', 'PRMEST2', 'VLREST2'],
+    ['QTDEST3', 'PRMEST3', 'VLREST3'],
+  ];
 
-  $consultaEstoque = $ConsultaEstoque->gerarPeriodos($mesAno);
-  
-    depurar($consultaEstoque);
+  $geraMesAno = $ConsultaEstoque->geraMesAno($mesAno);
+
+  // depurar($mesAno, $codDep, $codFam);
+  $consultaEstoque = $ConsultaEstoque->consultaEstoque($mesAno, $codDep, $codFam);
+  $total = COUNT($consultaEstoque);
+
+  $dadosAgrupados = [];
+  $TotalItens = 0;
+  foreach ($consultaEstoque as $item) {
+    $CodFam = $item['CODFAM'];
+    if (!isset($dadosAgrupados[$CodFam])) {
+      $dadosAgrupados[$CodFam] = [];
+    }
+    $dadosAgrupados[$CodFam][] = $item;
+    $TotalItens++;
+  }
+
+  $valoresTotais = [0, 0, 0];
+  foreach ($dadosAgrupados as $CodFam => $CodPro) {
+    $VlrTotalEst1 = array_sum(array_column($CodPro, 'VLREST1'));
+    $VlrTotalEst2 = array_sum(array_column($CodPro, 'VLREST2'));
+    $VlrTotalEst3 = array_sum(array_column($CodPro, 'VLREST3'));
+  }
+  $totalGeralEst1 = array_sum(array_column($consultaEstoque, 'VLREST1'));
+  $totalGeralEst2 = array_sum(array_column($consultaEstoque, 'VLREST2'));
+  $totalGeralEst3 = array_sum(array_column($consultaEstoque, 'VLREST3'));
 }
 // Inclui o header da página
 require_once __DIR__ . '/../includes/header.php';
@@ -86,133 +113,159 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="mb-3"></div>
 
 <!-- Exibindo Resultado -->
-<?php if (!empty($totalDetalhe)) : ?>
+<?php if (!empty($total)) : ?>
   <div class="container">
     <div class="card shadow-sm h-100">
-      <h5 class="card-header bg-primary text-white">
-        Qtde. Total de Movimentação: <?= $totalDetalhe ?> ||
-        Deposito: <?= $codDep ?> ||
-        Período: <?= date('d/m/Y', strtotime($dtInicio)) ?> - <?= date('d/m/Y', strtotime($dtFim)) ?>
-      </h5>
       <div class="card-body">
-        <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
+        <h5 style="text-align: center;" class="card-header bg-primary text-white">
+          Soma Geral Estoque
+        </h5>
+        <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc; border-collapse: collapse;">
           <thead>
             <tr class="table-primary">
-              <th>Família</th>
-              <th>Cod. Produto</th>
-              <th>Desc. Produto</th>
-              <th>U.M.</th>
-              <th>Dep.</th>
-              <th>Nº. Doc.</th>
-              <th>Seq.</th>
-              <th>Trans.</th>
-              <th>Tipo</th>
-              <th>Qtde. Mov.</th>
-              <th>Vlr. Mov.</th>
-              <th>Qtde. Estoque</th>
-              <th>Vlr. Estoque</th>
-              <th>Preço Médio</th>
-              <th>Dt. Digitada</th>
-              <th>Usuário</th>
+              <th scope="col" style="text-align: center;">Qtde. Total Itens</th>
+              <?php foreach ($geraMesAno as $mesAno): ?>
+                <th scope="col" style="text-align: center;"><?= htmlspecialchars($mesAno) ?></th>
+              <?php endforeach; ?>
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($detalheMovimentoitem as $item): ?>
-              <tr style="background-color: <?= $item['Tipo'] == 'S' ? '#ffcccc' : ($item['Tipo'] == 'E' ? '#cce5ff' : 'transparent') ?>;">
-                <td class="text-center"><?= $item['Familia'] ?></td>
-                <td class="text-center"><?= $item['codpro'] ?></td>
-                <td style="white-space: nowrap;"><?= $item['DescrFis'] ?></td>
-                <td class="text-center"><?= $item['UM'] ?></td>
-                <td class="text-center"><?= $item['Deposito'] ?></td>
-                <td class="text-center"><?= $item['NumDoc'] ?></td>
-                <td class="text-center"><?= $item['Seq'] ?></td>
-                <td class="text-center"><?= $item['Transacao'] ?></td>
-                <td class="text-center"><?= $item['Tipo'] ?></td>
-                <td><?= number_format($item['QtdeMovi'], 2, ',', '.') ?></td>
-                <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($item['VlrMov'], 2, ',', '.') ?></td>
-                <td><?= number_format($item['QtdeEst'], 2, '.', '') ?></td>
-                <td><?= $item['VlrEst'] ?></td>
-                <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($item['PreMed'], 2, ',', '.') ?></td>
-                <td class="text-center"><?= date('d/m/Y', strtotime($item['DtDigitada'])) ?></td>
-                <td><?= $item['Operador'] ?></td>
-              </tr>
-            <?php endforeach; ?>
+            <tr>
+              <th style="text-align: center;"><?= number_format($TotalItens, 0, ',', '.') ?></th>
+              <?php if ($totalGeralEst1 < 0): ?>
+                <th style="text-align: center;">
+                  <span style="color:red; font-weight: bold;">R$</span>
+                  <span style="color:red; font-weight: bold;"><?= number_format($totalGeralEst1, 2, ',', '.') ?></span>
+                </th>
+              <?php else: ?>
+                <th style="text-align: center;">
+                  <span style="color:blue; font-weight: bold;">R$</span>
+                  <span style="color:blue; font-weight: bold;"><?= number_format($totalGeralEst1, 2, ',', '.') ?></span>
+                </th>
+              <?php endif; ?>
+              <?php if ($totalGeralEst2 < 0): ?>
+                <th style="text-align: center;">
+                  <span style="color:red; font-weight: bold;">R$</span>
+                  <span style="color:red; font-weight: bold;"><?= number_format($totalGeralEst2, 2, ',', '.') ?></span>
+                </th>
+              <?php else: ?>
+                <th style="text-align: center;">
+                  <span style="color:blue; font-weight: bold;">R$</span>
+                  <span style="color:blue; font-weight: bold;"><?= number_format($totalGeralEst2, 2, ',', '.') ?></span>
+                </th>
+              <?php endif; ?> 
+              <?php if ($totalGeralEst3 < 0): ?>
+                <th style="text-align: center;">
+                  <span style="color:red; font-weight: bold;">R$</span>
+                  <span style="color:red; font-weight: bold;"><?= number_format($totalGeralEst3, 2, ',', '.') ?></span>
+                </th>
+              <?php else: ?>
+                <th style="text-align: center;">
+                  <span style="color:blue; font-weight: bold;">R$</span>
+                  <span style="color:blue; font-weight: bold;"><?= number_format($totalGeralEst3, 2, ',', '.') ?></span>
+                </th>
+              <?php endif; ?>
+            </tr>
+          </tbody>
         </table>
+        <div class="mb-3"></div>
+        <?php foreach ($dadosAgrupados as $CodFam => $CodPro): ?>
+          <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc; border-collapse: collapse;">
+            <thead>
+              <tr class="table-primary">
+                <th scope="col" colspan="2" style="text-align: center; text-transform: uppercase;"><?= $CodPro[0]['DESFAM'] ?></th>
+                <?php foreach ($geraMesAno as $mesAno): ?>
+                  <th scope="col" colspan="3" style="text-align: center;"><?= htmlspecialchars($mesAno) ?></th>
+                <?php endforeach; ?>
+                <th scope="col" rowspan="2" style="text-align: center; vertical-align: middle;">Status</th>
+              </tr>
+              <tr class="table-primary">
+                <th scope="col">Cod. Produto</th>
+                <th scope="col">Descrição Produto</th>
+                <th scope="col" style="text-align: center;">Qtde. Est.</th>
+                <th scope="col" style="text-align: center;">Preço Médio</th>
+                <th scope="col" style="text-align: center;">Vlr. Estoque</th>
+                <th scope="col" style="text-align: center;">Qtde. Est.</th>
+                <th scope="col" style="text-align: center;">Preço Médio</th>
+                <th scope="col" style="text-align: center;">Vlr. Estoque</th>
+                <th scope="col" style="text-align: center;">Qtde. Est.</th>
+                <th scope="col" style="text-align: center;">Preço Médio</th>
+                <th scope="col" style="text-align: center;">Vlr. Estoque</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($CodPro as $key => $item): ?>
+                <tr>
+                  <td style="text-align: center;"><?= $item['CODPRO'] ?></td>
+                  <td><?= $item['DESPRO'] ?></td>
+                  <?php foreach ($mesCampos as $campos): ?>
+                    <td style="text-align: right;"><?= number_format($item[$campos[0]], 2, '.', '') ?></td>
+                    <td style="text-align: right;">
+                      <span style="float: left;">R$</span>
+                      <?= $item[$campos[1]] < 0 ? '<span style="color: red; font-weight: bold;">' . number_format($item[$campos[1]], 2, ',', '.') . '</span>' : number_format($item[$campos[1]], 2, ',', '.') ?>
+                    </td>
+                    <td style="text-align: right;"><span style="float: left;">R$</span>
+                      <?= $item[$campos[2]] < 0 ? '<span style="color: red; font-weight: bold;">' . number_format($item[$campos[2]], 2, ',', '.') . '</span>' : number_format($item[$campos[2]], 2, ',', '.') ?>
+                    </td>
+                  <?php endforeach; ?>
+                  <td style="text-align: center;">
+                    <?php if (($item['PRMEST1'] - $item['PRMEST2']) > 5): ?>
+                      <span style="color: red; font-weight: bold;">XX</span>
+                    <?php else: ?>
+                      <span style="color: blue; font-weight: bold;">OK</span>
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+            <tbody>
+              <tr>
+                <th colspan="2" style="text-align: right;"> Valor Total Estoque:</th>
+                <?php if (array_sum(array_column($CodPro, 'VLREST1')) < 0): ?>
+                  <th colspan="3" style="text-align: right;">
+                    <span style="color:red; font-weight: bold;">R$</span>
+                    <span style="color:red; font-weight: bold;"><?= number_format(array_sum(array_column($CodPro, 'VLREST1')), 2, ',', '.') ?></span>
+                  </th>
+                <?php else: ?>
+                  <th colspan="3" style="text-align: right;">
+                    <span style="color:blue; font-weight: bold;">R$</span>
+                    <span style="color:blue; font-weight: bold;"><?= number_format(array_sum(array_column($CodPro, 'VLREST1')), 2, ',', '.') ?></span>
+                  </th>
+                <?php endif; ?>
+                <?php if (array_sum(array_column($CodPro, 'VLREST2')) < 0): ?>
+                  <th colspan="3" style="text-align: right;">
+                    <span style="color:red; font-weight: bold;">R$</span>
+                    <span style="color:red; font-weight: bold;"><?= number_format(array_sum(array_column($CodPro, 'VLREST2')), 2, ',', '.') ?></span>
+                  </th>
+                <?php else: ?>
+                  <th colspan="3" style="text-align: right;">
+                    <span style="color:blue; font-weight: bold;">R$</span>
+                    <span style="color:blue; font-weight: bold;"><?= number_format(array_sum(array_column($CodPro, 'VLREST2')), 2, ',', '.') ?></span>
+                  </th>
+                <?php endif; ?>
+                <?php if (array_sum(array_column($CodPro, 'VLREST3')) < 0): ?>
+                  <th colspan="3" style="text-align: right;">
+                    <span style="color:red; font-weight: bold;">R$</span>
+                    <span style="color:red; font-weight: bold;"><?= number_format(array_sum(array_column($CodPro, 'VLREST3')), 2, ',', '.') ?></span>
+                  </th>
+                <?php else: ?>
+                  <th colspan="3" style="text-align: right;">
+                    <span style="color:blue; font-weight: bold;">R$</span>
+                    <span style="color:blue; font-weight: bold;"><?= number_format(array_sum(array_column($CodPro, 'VLREST3')), 2, ',', '.') ?></span>
+                  </th>
+                <?php endif; ?>
+                <th></th>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mb-3"></div>
+        <?php endforeach; ?>
       </div>
     </div>
   </div>
 <?php endif; ?>
 
-<!-- Exibindo Resultado -->
-<?php if (!empty($totalMedia)) : ?>
-  <div class="container">
-    <div class="card shadow-sm h-100">
-      <h5 class="card-header bg-primary text-white">
-        Qtde. Itens: <?= $totalMediaHistorico ?> ||
-        Deposito: <?= $codDep ?> ||
-        Período: <?= date('d/m/Y', strtotime($dtInicio)) ?> - <?= date('d/m/Y', strtotime($dtFim)) ?> ||
-        Qtde. Itens com Dif.: <?= $qtdeDif ?>
-      </h5>
-      <div class="card-body">
-        <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
-          <thead>
-            <tr class="table-primary">
-              <th scope="col">Cod. Produto</th>
-              <th scope="col">Descrição Produto</th>
-              <th scope="col">Média Qtde. Movimentada</th>
-              <th scope="col">Média Valor Movimentado</th>
-              <th scope="col">Média Preço Médio</th>
-              <th scope="col">Diferença</th>
-            </tr>
-          </thead>
-          <?php foreach ($produtosComComparacao as $dados): ?>
-            <?php $item = $dados['produto']; ?>
-            <tbody>
-              <tr class="summary-row" data-CodPro="<?= $item['CodPro'] ?>" onclick="toggleDetails('<?= $item['CodPro'] ?>')">
-                <th><?= $item['CodPro'] ?></th>
-                <th><?= $item['DescPro'] ?></th>
-                <th style="text-align: right;"><?= number_format($item['QtdeMov'], 2, ',', '.') ?></th>
-                <th style="text-align: right;"><span style="float: left;">R$</span> <?= number_format($item['VlrMov'], 2, ',', '.') ?></th>
-                <th style="text-align: right;"><span style="float: left;">R$</span> <?= number_format($item['PrecoMedio'], 2, ',', '.') ?></th>
-                <th style="text-align: center;">
-                  <?php if ($dados['comparacao'] === 'X'): ?>
-                    <span class='badge bg-danger text-white font-weight-bold'>*****</span>
-                  <?php else: ?>
-                    &nbsp;
-                  <?php endif; ?>
-                </th>
-              </tr>
-            </tbody>
-            <thead class="detail-row hidden" data-CodPro="<?= $item['CodPro'] ?>">
-              <tr class="table-primary text-white">
-                <th colspan="2" style="text-align: center;">Data Movimento</th>
-                <th>Qtde. Movimentada</th>
-                <th>Valor Movimentado</th>
-                <th>Preço Médio</th>
-                <th>Diferença Preço</th>
-              </tr>
-            </thead>
-            <tbody class="detail-row hidden" data-CodPro="<?= $item['CodPro'] ?>">
-              <?php foreach ($dados['detalhes'] as $itens): ?>
-                <?php
-                $diferenca = (float)$itens['DiferencaPreco'];
-                $rowClass = (abs($diferenca) > 10) ? 'class="bg-danger text-white font-weight-bold"' : '';
-                ?>
-                <tr <?= $rowClass ?>>
-                  <td colspan="2" style="text-align: center;"><?= date('d/m/Y', strtotime($itens['DtMov'])) ?></td>
-                  <td style="text-align: right;"><?= number_format($itens['QtdeMov'], 2, ',', '.') ?></td>
-                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($itens['VlrMov'], 2, ',', '.') ?></td>
-                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($itens['PrecoMedio'], 2, ',', '.') ?></td>
-                  <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($itens['DiferencaPreco'], 2, ',', '.') ?></td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          <?php endforeach; ?>
-        </table>
-      </div>
-    </div>
-  </div>
-<?php endif; ?>
+
 
 
 <!-- Incluindo Java Script -->

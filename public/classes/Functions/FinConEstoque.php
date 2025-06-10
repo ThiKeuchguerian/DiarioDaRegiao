@@ -8,6 +8,7 @@ class ConsultaEstoque
   public function __construct()
   {
     $this->senior = DatabaseConnection::getConnection('senior');
+    $this->senior->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
   }
 
   /**
@@ -69,166 +70,111 @@ class ConsultaEstoque
 
     return $periodos;
   }
-
-
-
-  /**
-   * Média histórica de movimentação
-   *
-   * @param string|null    $codDep
-   * @param string|null $dtInicio  formato 'YYYY-MM-DD' ou 'DD/MM/YYYY'
-   * @param string|null $dtFim
+    /**
+   * Gera o Período de acordo com mesAno passado
+   * @param string $mesAno
    * @return array
    */
-  public function mediaHistoricoMovimento(
-    ?string $codDep   = null,
-    ?string $dtInicio = null,
-    ?string $dtFim    = null
-  ): array {
-    $sql =
-      " SELECT M.CODPRO AS CodPro, P.DESPRO   AS DescPro, AVG(M.QTDMOV) AS QtdeMov, AVG(M.VLRMOV) AS VlrMov, AVG(M.PRMEST) AS PrecoMedio
-          FROM E210MVP M
-        INNER JOIN E070EST E ON ((E.CODEMP = M.CODEMP) AND (E.CODFIL = M.FILDEP))
-        INNER JOIN E075PRO P ON ((P.CODEMP=M.CODEMP) AND (P.CODPRO=M.CODPRO))
-        LEFT JOIN E000MVI MI ON ((MI.CODEMP=M.CODEMP)  AND (MI.CODPRO = M.CODPRO) AND (MI.CODDER = M.CODDER) AND (MI.CODDEP = M.CODDEP) AND (MI.DATMOV = M.DATMOV)   AND (MI.SEQMOV = M.SEQMOV))
-        INNER JOIN E075DER D ON ((D.CODEMP=M.CODEMP) AND (D.CODPRO=M.CODPRO) AND (D.CODDER=M.CODDER)) 
-        WHERE M.CODEMP = 1 AND M.ESTMOV IN ('NO','NB','NR')
-      ";
-
-    $params = [];
-    $conds  = [];
-
-    if ($codDep !== null) {
-      $conds[]           = "M.CODDEP = :codDep";
-      $params[':codDep'] = $codDep;
-    }
-
-    if ($dtInicio && $dtFim) {
-      // normalize date para YYYY-MM-DD
-      $d1 = (new DateTime($dtInicio))->format('Ymd');
-      $d2 = (new DateTime($dtFim))->format('Ymd');
-      $conds[]              = "M.DATMOV BETWEEN :d1 AND :d2";
-      $params[':d1']        = $d1;
-      $params[':d2']        = $d2;
-    }
-
-    if (count($conds)) {
-      $sql .= "\n  AND " . implode("\n  AND ", $conds);
-    }
-
-    $sql .= "\n  GROUP BY M.CODPRO, P.DESPRO ORDER BY M.CODPRO";
-
-    $stmt = $this->senior->prepare($sql);
-    $stmt->execute($params);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-  }
-
-  /**
-   * Média analítica de movimentação (mês a mês e diferença)
-   */
-  public function mediaAnaliticoMovimento(?string $codDep, string $dtInicio, string $dtFim): array
+  public function geraMesAno(string $mesAno): array
   {
-    $sql =
-      "SELECT M.CODPRO AS CodPro, P.DESPRO AS DesPro, M.DATMOV AS DtMov,
-          AVG(M.QTDMOV) AS QtdeMov,
-          AVG(M.VLRMOV) AS VlrMov,
-          AVG(M.PRMEST) AS PrecoMedio,
-          CASE
-            WHEN 
-              CAST(
-              CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2)) - 
-              LAG(CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2))) OVER (
-                PARTITION BY M.CODPRO 
-                ORDER BY M.DATMOV
-              ) AS DECIMAL(10, 2)
-              ) IS NULL THEN '0.00'
-            ELSE CAST(
-              CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2)) - 
-              LAG(CAST((ROUND(AVG(M.PRMEST), 2, 3)) AS DECIMAL(10, 2))) OVER (
-                PARTITION BY M.CODPRO 
-                ORDER BY M.DATMOV
-              ) AS DECIMAL(10, 2)
-            )
-          END AS DiferencaPreco
-        FROM E210MVP M
-        INNER JOIN E070EST E ON ((E.CODEMP = M.CODEMP) AND (E.CODFIL = M.FILDEP))   
-        INNER JOIN E075PRO P ON ((P.CODEMP=M.CODEMP) AND (P.CODPRO=M.CODPRO))   
-        LEFT JOIN E000MVI MI ON ((MI.CODEMP=M.CODEMP)  AND (MI.CODPRO = M.CODPRO) AND (MI.CODDER = M.CODDER) AND (MI.CODDEP = M.CODDEP) AND (MI.DATMOV = M.DATMOV)   AND (MI.SEQMOV = M.SEQMOV))
-        INNER JOIN E075DER D ON ((D.CODEMP=M.CODEMP) AND (D.CODPRO=M.CODPRO) AND (D.CODDER=M.CODDER)) 
-        WHERE M.CODEMP = 1 AND M.CODDEP  = :codDep AND M.ESTMOV IN('NO','NB','NR')
-      ";
+    // Quebra MM/yyyy
+    list($mes, $ano) = explode('/', $mesAno);
+    $mes = (int)$mes;
+    $ano = (int)$ano;
 
-    $params = [':codDep' => $codDep];
-    if ($dtInicio <> '' && $dtFim <> '') {
-      $d1 = (new DateTime($dtInicio))->format('Ymd');
-      $d2 = (new DateTime($dtFim))->format('Ymd');
-      $sql .= "\n AND M.DATMOV BETWEEN :d1 AND :d2";
-      $params[':d1'] = $d1;
-      $params[':d2'] = $d2;
+    $periodos = [];
+
+    for ($i = 2; $i >= 0; $i--) {
+      $data = DateTime::createFromFormat('m/Y', str_pad($mes, 2, '0', STR_PAD_LEFT) . '/' . $ano);
+      $data->modify("-$i month");
+      $periodos["mesAno" . (3 - $i)] = $data->format('m/Y');
     }
 
-    $sql .= "\n  GROUP BY M.CODPRO, P.DESPRO, M.DATMOV ORDER BY M.CODPRO, M.DATMOV";
-
-    $stmt = $this->senior->prepare($sql);
-    $stmt->execute($params);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $periodos;
   }
-
   /**
-   * Detalhe completo das movimentações de um item
+   * Retorna estoque resumo por depósito para o mês atual e 2 meses atrás
    */
-  public function detalheMovimentoItem(
-    string  $codDep,
-    string  $codPro,
-    ?string $dtInicio = null,
-    ?string $dtFim    = null
-  ): array {
+  public function consultaEstoque(string $mesAno, string $codDep, string $codFam): array
+  {
+    // gera AnoMes1, AnoMes2, AnoMes3
+    $p = $this->gerarPeriodos($mesAno);
 
-    $sql =
-      " SELECT
-          M.coddep AS Deposito,
-          M.numdoc AS NumDoc,
-          M.codpro,
-          P.despro AS DescrFis,
-          P.codfam AS Familia,
-          M.codtns AS Transacao,
-          M.seqmov AS Seq,
-          P.unimed AS UM,
-          M.esteos AS Tipo,
-          U.r910usu_nomcom AS Operador,
-          M.qtdest AS QtdeEst,
-          M.vlrmov AS VlrMov,
-          M.vlrest AS VlrEst,
-          M.qtdmov AS QtdeMovi,
-          M.PRMEST AS PreMed,
-          M.datdig AS DtDigitada,
-          M.datmov AS DtMovimento
-        FROM E210MVP M
-        INNER JOIN E070EST E ON E.CODEMP = M.CODEMP AND E.CODFIL = M.FILDEP  
-        INNER JOIN E075PRO P ON P.CODEMP = M.CODEMP AND P.CODPRO = M.CODPRO  
-        LEFT JOIN E000MVI MI ON MI.CODEMP = M.CODEMP  AND MI.CODPRO = M.CODPRO AND MI.CODDER = M.CODDER AND MI.CODDEP = M.CODDEP AND MI.DATMOV = M.DATMOV AND MI.SEQMOV = M.SEQMOV
-        INNER JOIN E075DER D ON D.CODEMP = M.CODEMP AND D.CODPRO = M.CODPRO AND D.CODDER = M.CODDER
-        INNER JOIN EW99USU U ON M.usurec = U.r999usu_codusu
-        WHERE M.CODEMP = 1
-          AND M.coddep = :codDep
-          AND M.codpro = :codPro
-      ";
-
-    $params = [
-      ':codDep' => $codDep,
-      ':codPro' => $codPro
-    ];
-    if ($dtInicio && $dtFim) {
-      $d1 = (new DateTime($dtInicio))->format('Ymd');
-      $d2 = (new DateTime($dtFim))->format('Ymd');
-      $sql .= "\n  AND M.datmov BETWEEN :d1 AND :d2";
-      $params[':d1'] = $d1;
-      $params[':d2'] = $d2;
+    // monta dinamicamente as CTEs ConsultaMes1, ConsultaMes2, ConsultaMes3
+    $ctes = [];
+    for ($i = 1; $i <= 3; $i++) {
+      $ctes[] = "
+        ConsultaMes{$i} AS (
+          SELECT P.CODFAM, F.DESFAM, M.CODPRO, P.DESPRO, M.QTDEST, M.PRMEST, M.VLREST, FORMAT(M.DATMOV,'MM/yyyy') AS MesAno
+          FROM E210MVP M
+          INNER JOIN E075PRO P ON P.CODEMP=M.CODEMP AND P.CODPRO=M.CODPRO
+          INNER JOIN E075DER D ON D.CODEMP=M.CODEMP AND D.CODPRO=M.CODPRO AND D.CODDER=M.CODDER
+          INNER JOIN E012FAM F ON F.CODEMP=P.CODEMP AND F.CODFAM=P.CODFAM
+          WHERE M.CODEMP = 1
+            AND M.FILDEP = 1 
+            AND M.ULTMDI = 'S'
+            AND P.SITPRO = 'A'
+            AND M.CODDEP = :codDep
+            AND M.DATMOV <= :mes{$i}
+            AND M.ESTMOV IN('NO','NR','NB')
+            AND M.DATMOV = (
+              SELECT MAX(M2.DATMOV)
+              FROM E210MVP M2
+              WHERE M2.CODEMP = 1
+                AND M2.FILDEP = 1 
+                AND M2.ULTMDI = 'S'
+                AND M2.ESTMOV IN('NO','NR','NB')
+                AND M2.CODDEP = :codDep
+                AND M2.CODPRO = M.CODPRO
+                AND M2.CODDER = M.CODDER
+                AND M2.FILDEP = M.FILDEP
+                AND M2.DATMOV <= :mes{$i}
+        )";
     }
 
-    $sql .= "\n ORDER BY M.codpro, M.datmov";
-    // depurar($sql, $params);
+    $queryFim =
+      " SELECT
+          COALESCE(C1.CODFAM,C2.CODFAM,C3.CODFAM) AS CODFAM,
+          COALESCE(C1.DESFAM,C2.DESFAM,C3.DESFAM) AS DESFAM,
+          COALESCE(C1.CODPRO,C2.CODPRO,C3.CODPRO) AS CODPRO,
+          COALESCE(C1.DESPRO,C2.DESPRO,C3.DESPRO) AS DESPRO,
+          C1.QTDEST AS QTDEST1,
+          C1.PRMEST AS PRMEST1,
+          C1.VLREST AS VLREST1,
+          C2.QTDEST AS QTDEST2,
+          C2.PRMEST AS PRMEST2,
+          C2.VLREST AS VLREST2,
+          C3.QTDEST AS QTDEST3,
+          C3.PRMEST AS PRMEST3,
+          C3.VLREST AS VLREST3
+        FROM ConsultaMes1 C1
+        FULL OUTER JOIN ConsultaMes2 C2 ON C1.CODFAM=C2.CODFAM AND C1.CODPRO=C2.CODPRO
+        FULL OUTER JOIN ConsultaMes3 C3 ON C1.CODFAM=C3.CODFAM AND C1.CODPRO=C3.CODPRO
+        ORDER BY CODFAM,DESFAM,CODPRO,DESPRO 
+      ";
+
+    if ($codFam <> '0') {
+      $ctes = implode("\n AND F.CODFAM = :codFam ),", $ctes);
+      $sql = "WITH " . $ctes . "\n AND F.CODFAM = :codFam ) " . $queryFim;
+    } else {
+      $sql = "WITH " . implode("),\n", $ctes) . " ) " . $queryFim;
+    }
+
+    // Prepara e bind dos parâmetros
     $stmt = $this->senior->prepare($sql);
+    if ($codFam <> '0') {
+      $params = [
+        ':codDep' => $codDep,
+        ':codFam' => $codFam
+      ];
+    } else {
+      $params = [':codDep' => $codDep];
+    }
+
+    for ($i = 1; $i <= 3; $i++) {
+      $params["mes{$i}"] = $p["AnoMes{$i}"];
+    }
+    // depurar($params, $sql);
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
