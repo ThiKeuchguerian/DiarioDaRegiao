@@ -34,13 +34,30 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-$(document).ready(function () {
-  // Captura o botão de impressão pelo ID
-  const btnImprimir = document.getElementById("Imprimir");
 
-  // Adiciona um ouvinte de evento de clique ao botão de impressão
+$(document).ready(function () {
+  const btnImprimir = document.getElementById("btn-imprimir");
+
   btnImprimir.addEventListener("click", function () {
-    // Abre a janela de impressão do navegador
+    // Cria ou atualiza o estilo para impressão em paisagem
+    let style = document.getElementById('print-landscape-style');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'print-landscape-style';
+      style.media = 'print';
+      style.innerHTML = '@page { size: landscape; }';
+      document.head.appendChild(style);
+    }
+
+    // Esconde o formulário antes de imprimir
+    const form = document.querySelector("form");
+    if (form) form.style.display = "none";
+
+    // Garante que a tabela resultado fique visível
+    const resultado = document.getElementById("Resultado");
+    if (resultado) resultado.style.display = "table";
+
+    // Imprime mantendo o layout
     window.print();
   });
 });
