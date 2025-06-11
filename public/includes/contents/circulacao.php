@@ -21,7 +21,7 @@
     <a href="circulacao/CirValidadorCPFL.php" class="btn btn-primary btn-sm" style="color: white;"> Validador CPFL </a>
     <div class="mb-3"></div>
     <!-- <a href="RelExAssinantes.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Ex-Assinantes </a> -->
-    <!-- <a href="ConsultaCliGestor.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Cliente Gestor </a> -->
+    <a href="circulacao/CirConsultaCliGestor.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Cliente Gestor </a>
     <div class="mb-3"></div>
     <a href="circulacao/CirComissao.php" class="btn btn-primary btn-sm" style="color: white;"> Comissão Circulação </a>
     <div class="mb-3"></div>
