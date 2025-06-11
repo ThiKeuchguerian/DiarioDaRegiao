@@ -70,6 +70,36 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Espaço entre o menu e o resultado -->
 <div class="mb-3"></div>
 
+<!-- Exibindo Resultado -->
+<?php if (!empty($Total)) : ?>
+  <div class="container">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-header bg-primary text-white">
+          Qtde. Total:  || 
+        </h5>
+        <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
+          <thead>
+            <tr class="table-primary">
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<?php endif; ?>
+
 <!-- Inclui JavaScript -->
 <script src="<?= URL_PRINCIPAL ?>js/maskcampos.js"></script>
 <script src="<?= URL_PRINCIPAL ?>js/exibirtabela.js"></script>
