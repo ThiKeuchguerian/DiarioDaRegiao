@@ -11,31 +11,31 @@
           <input type="hidden" id="editId" name="editId">
           <div class="row mb-3">
             <div class="col">
-              <label for="editSistem" class="form-label label-bold"><strong>Sistema</strong></label>
+              <label for="editSistem" class="form-label"><strong>Sistema</strong></label>
               <input type="text" style="background-color: #e9ecef;" class="form-control" id="editSistem" name="Sistema" readonly>
             </div>
             <div class="col">
-              <label for="editCodCliente" class="form-label label-bold"><strong>Cod. Cliente</strong></label>
+              <label for="editCodCliente" class="form-label"><strong>Cod. Cliente</strong></label>
               <input type="text" class="form-control" id="editCodCliente" name="CodCliente" maxlength="6" required>
             </div>
             <div class="col">
-              <label for="editCodVendedor" class="form-label label-bold"><strong>Cod. Vendedor</strong></label>
+              <label for="editCodVendedor" class="form-label"><strong>Cod. Vendedor</strong></label>
               <input type="text" class="form-control" id="editCodVendedor" name="CodVendedor" maxlength="5">
             </div>
           </div>
           <div class="row mb-3">
             <div class="col">
-              <label for="editRazaoSocial" class="form-label label-bold"><strong>Nome / Razão Social</strong></label>
+              <label for="editRazaoSocial" class="form-label"><strong>Nome / Razão Social</strong></label>
               <input type="text" class="form-control" id="editRazaoSocial" name="RazaoSocial" required>
             </div>
           </div>
           <div class="row mb-3">
             <div class="col">
-              <label for="editCpfCnpj" class="form-label label-bold"><strong>CPF/CNPJ</strong></label>
+              <label for="editCpfCnpj" class="form-label"><strong>CPF/CNPJ</strong></label>
               <input type="text" style="background-color: #e9ecef;" class="form-control" id="editCpfCnpj" name="CpfCnpj" required readonly>
             </div>
             <div class="col">
-              <label for="editTipo" class="form-label label-bold"><strong>Tipo</strong></label>
+              <label for="editTipo" class="form-label"><strong>Tipo</strong></label>
               <select class="form-control" id="editTipo" name="Tipo" required>
                 <option value="0">--Selecione Tipo --</option>
                 <option value="1">Física</option>

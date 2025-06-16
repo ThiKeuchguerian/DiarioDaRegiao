@@ -18,7 +18,6 @@
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-
   <style>
     body {
       background: #f5f5f5;
@@ -137,6 +136,7 @@
     label {
       font-family: Verdana, Geneva, Tahoma, sans-serif;
       font-size: 11px;
+      font-weight: bold;
     }
 
     div {
