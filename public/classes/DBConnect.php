@@ -79,7 +79,13 @@ class DatabaseConnection
           $user = 'root';
           $pass = 'P0hRk6aON10f';
           break;
-          
+        
+        case 'publegal':
+          $dsn = "mysql:host=168.75.90.69;port=3312;dbname=db_publicidade_legal;charset=utf8";
+          $user = "root";
+          $pass = "Mt2g2MCPfA4jnWj6Z3EM";
+          break;
+
         default:
           throw new Exception("Conexão '$db' não definida.");
       }
