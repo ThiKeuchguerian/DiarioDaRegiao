@@ -8,14 +8,24 @@ $URL = URL_PRINCIPAL . 'artes/ArtPubLegal.php';
 // Instanciar a classe
 $UploadController = new UploadController();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btn-buscar'])) {
+if (isset($_POST['btn-buscar'])) {
+  $dados = $_POST;
 
-  // $SomaAnual = $ClassifCheckMetas->ConsultaAno($Ano);
+  $consultaPubLegal = $UploadController->consultaPub($dados);
+  $Total = COUNT($consultaPubLegal);
+} elseif (isset($_POST['btn-enviar'])) {
+  $dados = $_POST;
+  depurar($dados);
+} elseif (isset($_POST['btn-salvar'])) {
+  $dados = $_POST;
 
-} else if (isset($_POST['btn-analitico'])) {
+  $updatePubLegal = $UploadController->updatePub($dados);
+} elseif (isset($_POST['btn-apagar'])) {
+  $dados = $_POST;
 
-  // $Analitico = $ClassifCheckMetas->ConsultaDia($MesAno);
+  $deletePubLegal - $UploadController->deletePub($dados);
 }
+
 // Inclui o header da página
 require_once __DIR__ . '/../includes/header.php';
 ?>
@@ -93,8 +103,58 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Espaço entre o menu e o resultado -->
 <div class="mb-3"></div>
 
+<!-- Exibindo Resultado -->
+<?php if (!empty($Total)) : ?>
+  <div class="container">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-header bg-primary text-white">
+          Qtde. Total: <?= $Total ?>||
+        </h5>
+        <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
+          <thead>
+            <tr class="table-primary">
+              <th scope="col">ID</th>
+              <th scope="col">Empresa</th>
+              <th scope="col">Título</th>
+              <th scope="col">Dt. Publicação</th>
+              <th scope="col">Arquivo Digital</th>
+              <th scope="col">Arquivo Impresso</th>
+              <th scope="col">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($consultaPubLegal as $key => $item): ?>
+              <tr>
+                <td><?= $item['id'] ?></td>
+                <td><?= htmlspecialchars($item['company']) ?></td>
+                <td><?= htmlspecialchars($item['title']) ?></td>
+                <td><?= date('d/m/Y', strtotime($item['DtPublicacao'])) ?></td>
+                <td><?= $item['digital'] ?></td>
+                <td><?= $item['printed'] ?></td>
+                <td>
+                  <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal"
+                    data-id="<?= $item['id'] ?>"
+                    data-company="<?= htmlspecialchars($item['company']) ?>"
+                    data-title="<?= htmlspecialchars($item['title']) ?>"
+                    data-DtPublicacao="<?= date('d/m/Y', strtotime($item['DtPublicacao'])) ?>">Editar</button>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<?php endif; ?>
+
+
+<!-- Inclui o modal -->
+<?php require_once __DIR__ . '/../includes/modals/art_PubLegal.php'; ?>
+
+<!-- Inclui o Java Script -->
 <script src="<?= URL_PRINCIPAL ?>js/maskcampos.js"></script>
-<script src="<?= URL_PRINCIPAL ?>js/exibirtabela.js"></script>
+<script src="<?= URL_PRINCIPAL ?>js/art_publegal.js"></script>
 
 <!-- Inclui o footer da página -->
 <?php
