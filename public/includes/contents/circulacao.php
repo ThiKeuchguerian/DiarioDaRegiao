@@ -30,7 +30,7 @@
     <!-- <a href="CirulacaoGeraCodigoBarrra.php" class="btn btn-primary btn-sm" style="color: white;"> Boleto com Erro </a> -->
     <!-- <a href="CirculacaoGeraBoleto.php" class="btn btn-primary btn-sm" style="color: white;"> 2º Via Boleto</a> -->
     <!-- <a href="CirculacaoGeraSegViaBoleto.php" class="btn btn-primary btn-sm" style="color: white;"> 2º Via Boleto Carne</a> -->
-    <!-- <a href="CirculacaoValidaContratoCbo.php" class="btn btn-primary btn-sm" style="color: white;"> Contratos com Dt. Diferente </a> -->
+    <a href="circulacao/CirConDifVigencia.php" class="btn btn-primary btn-sm" style="color: white;"> Contratos Cbo - Diferença Vigencia </a>
     <!-- <a href="CirculacaoLembreteCobranca.php" class="btn btn-primary btn-sm" style="color: white;"> Lembrete de Cobrança </a> -->
     <!-- <a href="CirculacaoLembreteCobrancaPdf.php" class="btn btn-primary btn-sm" style="color: white;"> Lembrete de Cobrança (Envia Boleto) </a> -->
   </div>
