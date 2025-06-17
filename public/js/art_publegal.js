@@ -21,3 +21,14 @@ editModal.addEventListener('show.bs.modal', event => {
   modalTitleInput.value = title;
   modalDtPubInput.value = DtPublicacao;
 });
+$('#btn-buscar').on('click', function (e) {
+  const empresa = $('#Empresa').val().trim();
+  const titulo = $('#Titulo').val().trim();
+  const dtInicio = $('#DtInicio').val().trim();
+  const dtFim = $('#DtFim').val().trim();
+
+  if (!empresa && !titulo && !dtInicio && !dtFim) {
+    e.preventDefault();
+    alert('Preencha pelo menos um dos campos: Empresa, Título, Período Inicial ou Período Final.');
+  }
+});

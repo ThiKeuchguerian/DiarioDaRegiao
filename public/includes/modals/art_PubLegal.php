@@ -41,6 +41,44 @@
   </div>
 </div>
 
+<!-- Modal de Publicação -->
+<div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="postModalLabel">Nova Publicação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="<?= $URL ?>" id="PostForm" method="post" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="post-company" class="form-label">Empresa</label>
+            <input type="text" class="form-control" id="post-company" name="company">
+          </div>
+          <div class="mb-3">
+            <label for="post-title" class="form-label">Título</label>
+            <input type="text" class="form-control" id="post-title" name="title">
+          </div>
+          <div class="mb-3">
+            <label for="post-digital" class="form-label">Arquivo Digital</label>
+            <input type="file" class="form-control" id="post-digital" name="arquivo_digital">
+          </div>
+          <div class="mb-3">
+            <label for="post-impresso" class="form-label">Arquivo Impresso</label>
+            <input type="file" class="form-control" id="post-impresso" name="arquivo_impresso">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" name="btn-fechar" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+          <button type="submit" name="btn-enviar" class="btn btn-primary btn-sm">Enviar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
 <!-- Modal de Mensagem -->
 <!-- <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -50,15 +88,18 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <?php //if ($messageType === 'success'): ?>
+        <?php //if ($messageType === 'success'): 
+        ?>
           <div class="alert alert-success" role="alert">
             <?= $message ?>
           </div>
-        <?php //elseif ($messageType === 'error'): ?>
+        <?php //elseif ($messageType === 'error'): 
+        ?>
           <div class="alert alert-danger" role="alert">
             <?= $message ?>
           </div>
-        <?php //endif; ?>
+        <?php //endif; 
+        ?>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>

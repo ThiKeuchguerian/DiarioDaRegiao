@@ -15,7 +15,8 @@ if (isset($_POST['btn-buscar'])) {
   $Total = COUNT($consultaPubLegal);
 } elseif (isset($_POST['btn-enviar'])) {
   $dados = $_POST;
-  depurar($dados);
+
+  $insertPubLegal = $UploadController->insertPub($dados);
 } elseif (isset($_POST['btn-salvar'])) {
   $dados = $_POST;
 
@@ -68,30 +69,10 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
           </div>
         </div>
-        <div class="card-header bg-primary text-white">
-          <div class="row">
-            <div class="col">
-              <strong>Arquivo Digital</strong>
-            </div>
-            <div class="col">
-              <strong>Arquivo Impresso</strong>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="row justify-content-center">
-            <div class="col">
-              <input type="file" class="form-control form-control-sm" id="arquivo_digital" name="arquivo_digital">
-            </div>
-            <div class="col">
-              <input type="file" class="form-control form-control-sm" id="arquivo_impresso" name="arquivo_impresso">
-            </div>
-          </div>
-        </div>
         <div class="card-footer d-flex justify-content-end">
           <div class="col text-end">
             <button id="btn-buscar" name="btn-buscar" type="submit" class="btn btn-primary btn-sm">Buscar</button>
-            <button id="btn-enviar" name="btn-enviar" type="submit" class="btn btn-primary btn-sm">Enviar</button>
+            <button type="button" id="btn-enviar" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#postModal">Publicar</button>
             <a class="btn btn-primary btn-sm" href="<?= URL_PRINCIPAL ?>">Voltar</a>
           </div>
         </div>
@@ -109,7 +90,7 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="card shadow-sm">
       <div class="card-body">
         <h5 class="card-header bg-primary text-white">
-          Qtde. Total: <?= $Total ?>||
+          Qtde. Total: <?= $Total ?>
         </h5>
         <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
           <thead>
@@ -133,7 +114,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <td><?= $item['digital'] ?></td>
                 <td><?= $item['printed'] ?></td>
                 <td>
-                  <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal"
+                  <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal"
                     data-id="<?= $item['id'] ?>"
                     data-company="<?= htmlspecialchars($item['company']) ?>"
                     data-title="<?= htmlspecialchars($item['title']) ?>"
@@ -148,12 +129,10 @@ require_once __DIR__ . '/../includes/header.php';
   </div>
 <?php endif; ?>
 
-
 <!-- Inclui o modal -->
 <?php require_once __DIR__ . '/../includes/modals/art_PubLegal.php'; ?>
 
 <!-- Inclui o Java Script -->
-<script src="<?= URL_PRINCIPAL ?>js/maskcampos.js"></script>
 <script src="<?= URL_PRINCIPAL ?>js/art_publegal.js"></script>
 
 <!-- Inclui o footer da página -->
