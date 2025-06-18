@@ -51,7 +51,7 @@ class UploadController
     }
 
     $sql .= "\n ORDER BY created_at DESC";
-    
+
     $stmt = $this->publegal->prepare($sql);
     $stmt->execute($params);
 
@@ -60,8 +60,8 @@ class UploadController
 
   public function insertPub(array $dados): array
   {
-    $company = $dados['Empresa'] ?? '';
-    $title   = $dados['Titulo'] ?? '';
+    $company = $dados['company'] ?? '';
+    $title   = $dados['title'] ?? '';
     $arqDig  = $dados['arquivo_digital'] ?? '';
     $arqImp  = $dados['arquivo_impresso'] ?? '';
 
@@ -77,6 +77,7 @@ class UploadController
       ':created_at' => date('Y-m-d H:i:s', strtotime('+1 day')),
       ':updated_at' => date('Y-m-d H:i:s')
     ];
+
 
     $stmt = $this->publegal->prepare($insert);
     $stmt->execute($params);
@@ -137,7 +138,7 @@ class UploadController
     } else {
       return ['success' => false, 'message' => 'ID não informado.'];
     }
-
+    // depurar($params, $update);
     $stmt = $this->publegal->prepare($update);
     $stmt->execute($params);
 

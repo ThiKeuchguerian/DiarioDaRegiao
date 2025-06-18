@@ -31,7 +31,6 @@
           </div>
         </div>
         <div class="modal-footer">
-          <!-- <input type="hidden" name="id" value="<?= $item['id'] ?>"> -->
           <button type="button" name="btn-fechar" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
           <button type="submit" name="btn-apagar" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja apagar este registro?')">Apagar</button>
           <button type="submit" name="btn-salvar" class="btn btn-primary btn-sm">Salvar</button>

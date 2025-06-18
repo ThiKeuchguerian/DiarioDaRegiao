@@ -21,6 +21,8 @@ if (isset($_POST['btn-buscar'])) {
   $dados = $_POST;
 
   $updatePubLegal = $UploadController->updatePub($dados);
+  $consultaPubLegal = $UploadController->consultaPub($dados);
+  $Total = COUNT($consultaPubLegal);
 } elseif (isset($_POST['btn-apagar'])) {
   $dados = $_POST;
 
@@ -72,7 +74,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="card-footer d-flex justify-content-end">
           <div class="col text-end">
             <button id="btn-buscar" name="btn-buscar" type="submit" class="btn btn-primary btn-sm">Buscar</button>
-            <button type="button" id="btn-enviar" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#postModal">Publicar</button>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#postModal">Publicar</button>
             <a class="btn btn-primary btn-sm" href="<?= URL_PRINCIPAL ?>">Voltar</a>
           </div>
         </div>
@@ -99,6 +101,7 @@ require_once __DIR__ . '/../includes/header.php';
               <th scope="col">Empresa</th>
               <th scope="col">Título</th>
               <th scope="col">Dt. Publicação</th>
+              <th scope="col">Ult. Alteração</th>
               <th scope="col">Arquivo Digital</th>
               <th scope="col">Arquivo Impresso</th>
               <th scope="col">Ação</th>
@@ -111,6 +114,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <td><?= htmlspecialchars($item['company']) ?></td>
                 <td><?= htmlspecialchars($item['title']) ?></td>
                 <td><?= date('d/m/Y', strtotime($item['DtPublicacao'])) ?></td>
+                <td><?= date('d/m/Y', strtotime($item['updated_at'])) ?></td>
                 <td><?= $item['digital'] ?></td>
                 <td><?= $item['printed'] ?></td>
                 <td>
