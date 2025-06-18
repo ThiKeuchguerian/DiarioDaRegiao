@@ -79,11 +79,17 @@ class DatabaseConnection
           $user = 'root';
           $pass = 'P0hRk6aON10f';
           break;
-        
+
         case 'publegal':
           $dsn = "mysql:host=168.75.90.69;port=3312;dbname=db_publicidade_legal;charset=utf8";
           $user = "root";
           $pass = "Mt2g2MCPfA4jnWj6Z3EM";
+          break;
+
+        case 'contaDiario':
+          $dsn = "mysql:host=168.138.142.63;port=3310;dbname=conta_diario;charset=utf8";
+          $user = 'root';
+          $pass = '605422Q7HwOtr5rP4j';
           break;
 
         default:
