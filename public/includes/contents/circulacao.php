@@ -3,6 +3,7 @@
     <a href="circulacao/CirAjusteParcBB.php" class="btn btn-primary btn-sm" style="color: white;"> Ajustar Parcelas BB</a>
     <a href="circulacao/CirValidadorCPFL.php" class="btn btn-primary btn-sm" style="color: white;"> Validador CPFL </a>
     <a href="circulacao/CirConsultaCode.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Código Validação </a>
+    <a href="circulacao/CirConsultaCliGestor.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Cliente Gestor </a>
     <div class="mb-3"></div>
     <a href="circulacao/CirListaSemVivaMais.php" class="btn btn-primary btn-sm" style="color: white;"> Listagem Sem Viva + </a>
     <div class="mb-3"></div>
@@ -21,9 +22,8 @@
     <!-- <a href="RelacaoAssinantesCancelados.php" class="btn btn-primary btn-sm" style="color: white;">Contratos Cancelados - Analítico</a> -->
     <div class="mb-3"></div>
     <!-- <a href="DistribPontosApoio.php" class="btn btn-primary btn-sm" style="color: white;"> Distribuição Pontos Apoio </a> -->
-    
+
     <!-- <a href="RelExAssinantes.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Ex-Assinantes </a> -->
-    <a href="circulacao/CirConsultaCliGestor.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Cliente Gestor </a>
     <div class="mb-3"></div>
     <a href="circulacao/CirComissao.php" class="btn btn-primary btn-sm" style="color: white;"> Comissão Circulação </a>
     <div class="mb-3"></div>
