@@ -9,6 +9,7 @@ services:
       - traefik.http.routers.devsistemasdiario.rule=Host(`devsistemas.diariodaregiao.com.br`)
       - traefik.http.routers.devsistemasdiario.entrypoints=web
       - traefik.http.routers.devsistemasdiario.tls=false
+      - traefik.http.services.devsistemasdiario.loadbalancer.server.port=80
     volumes:
       - ./public:/var/www/html
       - ./scripts:/srv
