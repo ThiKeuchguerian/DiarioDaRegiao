@@ -33,7 +33,8 @@
     <!-- <a href="CirculacaoGeraBoleto.php" class="btn btn-primary btn-sm" style="color: white;"> 2º Via Boleto</a> -->
     <!-- <a href="CirculacaoGeraSegViaBoleto.php" class="btn btn-primary btn-sm" style="color: white;"> 2º Via Boleto Carne</a> -->
     <a href="circulacao/CirConDifVigencia.php" class="btn btn-primary btn-sm" style="color: white;"> Contratos Cbo - Diferença Vigencia </a>
-    <!-- <a href="CirculacaoLembreteCobranca.php" class="btn btn-primary btn-sm" style="color: white;"> Lembrete de Cobrança </a> -->
-    <!-- <a href="CirculacaoLembreteCobrancaPdf.php" class="btn btn-primary btn-sm" style="color: white;"> Lembrete de Cobrança (Envia Boleto) </a> -->
+    <div class="mb-3"></div>
+    <a href="circulacao/CirLembreteCob.php" class="btn btn-primary btn-sm" style="color: white;"> Lembrete de Cobrança </a>
+    <a href="CirculacaoLembreteCobrancaPdf.php" class="btn btn-primary btn-sm" style="color: white;"> Lembrete de Cobrança (Envia Boleto) </a>
   </div>
 </div>

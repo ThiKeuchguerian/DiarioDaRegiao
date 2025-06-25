@@ -18,6 +18,7 @@ RUN apt-get -y update --fix-missing && \
   apt-get --no-install-recommends install -y apt-utils vim net-tools tree unixodbc unixodbc-dev ca-certificates ssh libssh2-1 libssh2-1-dev openssh-client pkg-config && \
   apt-get install -y apt-transport-https gnupg wget libcurl4-openssl-dev libedit-dev libsqlite3-dev libssl-dev libxml2-dev zlib1g-dev libpng-dev libmcrypt-dev libjpeg-dev && \
   apt-get install -y freetds-dev freetds-bin freetds-common libdbd-freetds libsybdb5 libqt5sql5-tds libzip-dev zip unzip locales && \
+  apt-get install -y software-properties-common less pciutils tcpdump rsyslog ntp curl && \
   rm -rf /var/lib/apt/lists/*
 RUN pecl install ssh2
 
@@ -74,6 +75,5 @@ RUN chown -R www-data:www-data /keys \
 RUN service apache2 restart
 CMD ["apachectl", "-D", "FOREGROUND"]
 
-COPY ./scripts/install.sh /usr/local/bin/install.sh
-RUN chmod +x /usr/local/bin/install.sh
-RUN sh -x /usr/local/bin/install.sh
+RUN chmod +x /srv/install.sh
+RUN bash /srv/install.sh

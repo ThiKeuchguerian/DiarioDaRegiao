@@ -1,0 +1,14 @@
+{
+  "name": "diario/projeto",
+  "description": "Sistema interno do jornal",
+  "type": "project",
+  "license": "proprietary",
+  "autoload": {
+    "psr-4": {
+      "Diario\\\\": "../../includes/"
+    }
+  },
+  "require": {
+    "phpmailer/phpmailer": "^6.10"
+  }
+}
