@@ -72,8 +72,9 @@ RUN mkdir /keys
 RUN chown -R www-data:www-data /keys \
   && chmod -R 755 /keys
 
-RUN service apache2 restart
-CMD ["apachectl", "-D", "FOREGROUND"]
-
+COPY ./scripts/install.sh /srv/install.sh
 RUN chmod +x /srv/install.sh
 RUN bash /srv/install.sh
+
+RUN service apache2 restart
+CMD ["apachectl", "-D", "FOREGROUND"]
