@@ -16,7 +16,7 @@ services:
       - ./config/apache:/etc/apache2/sites-enabled
       - ./config/php:/usr/local/etc/php/php.ini
       - ./config/ssl:/etc/ssl
-      - ./config/composer:/var/www/html/config/composer
+      # - ./config/composer:/var/www/html/config/composer
     restart: always
     environment:
       - TZ=America/Sao_Paulo
