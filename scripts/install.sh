@@ -91,10 +91,10 @@ composer require phpmailer/phpmailer:^6.9 --working-dir=config/composer/ --no-in
 echo "📦 Instalando DomPDF..."
 composer require dompdf/dompdf:^2.0 --working-dir=config/composer/ --no-interaction
 
-echo "📦 Instalando OpenBoleto..."
-composer require openboleto/openboleto:^1.1 --working-dir=config/composer/ --no-interaction
-
 echo "📦 Instalando Masterminds Twig..."
 composer require masterminds/html5:^2.8 --working-dir=config/composer/ --no-interaction
+
+echo "📦 Instalando OpenBoleto..."
+composer require openboleto/openboleto:^1.0 --working-dir=config/composer/ --no-interaction
 
 echo "✅ Instalação finalizada com sucesso! ⏱️ $(date)"
