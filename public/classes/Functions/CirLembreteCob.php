@@ -1,8 +1,13 @@
 <?php
 require_once __DIR__ . '/../DBConnect.php';
-require_once __DIR__ . '/../config/composer/vendor/autoload.php';
+require_once __DIR__ . '/../../config/composer/vendor/autoload.php';
 
+use Dompdf\Dompdf;
+use OpenBoleto\Agente;
+use OpenBoleto\Banco\Bradesco;
+use OpenBoleto\Banco\Itau;
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class CirLembreteCobranca
 {
@@ -32,10 +37,35 @@ class CirLembreteCobranca
     $dtFim    = $dados['dtFim'];
     $tipoCob  = $dados['tipoCob'];
 
-    $sql =
-      "SELECT fin.numeroDoContrato, fin.numeroDaParcela, Con.quantidadeDeParcelasDoContrato AS numeroDeParcelas, fin.numeroBancario, TRIM(pessoa.email) AS email,
+    if ($tipoCob <> '2') {
+      $sql =
+        "SELECT fin.numeroDoContrato, fin.numeroDaParcela, Con.quantidadeDeParcelasDoContrato AS numeroDeParcelas, fin.numeroBancario,trim(pessoa.email) as email,
+            fin.numeroLoteRemessa, Con.codigoDaPessoa, nomeRazaoSocial, fin.dataDoVencimento,
+            fin.valorDaParcela, pessoa.identMF as CpfCnpj, fin.portador AS codigoDoPortador, Por.nomePortador,
+            CASE 
+              WHEN fin.valorDaParcela = fin.saldoValorParcela THEN '0.00'
+              WHEN fin.saldoValorParcela = 0 THEN '0.00'
+              WHEN fin.saldoValorParcela > 0 AND (fin.valorDaParcela <> fin.saldoValorParcela) THEN fin.valorDaParcela - fin.saldoValorParcela
+            END AS descontos, TCob.descricaoReduzida AS descricaoTipoCobranca,
+            CASE WHEN Pl.descricaoDoPlanoDePagamento LIKE '%ANU%' THEN 'Anual'
+                 WHEN Pl.descricaoDoPlanoDePagamento LIKE '%TRI%' THEN 'Trimestral'
+                 WHEN Pl.descricaoDoPlanoDePagamento LIKE '%SEM%' THEN 'Semestral'
+                 WHEN Pl.descricaoDoPlanoDePagamento LIKE '%MEN%' THEN 'Mensal' END AS Plano,
+            CASE WHEN Con.tipoDeContrato = 'I' THEN 'Inclusão' WHEN Con.tipoDeContrato = 'R' THEN 'Renovação' END AS Tipo
+          FROM assFinanceiroDoContrato fin WITH(NOLOCK)
+            INNER JOIN assContratos Con WITH(NOLOCK) ON Con.numeroDoContrato = fin.numeroDoContrato
+            INNER JOIN cadPlanoDePagamento Pl WITH (NOLOCK) ON Pl.codigoDoPlanoDePagamento = Con.codigoDoPlanoDePagamento
+            INNER JOIN vCadPessoaFisicaJuridica pessoa WITH(NOLOCK) ON pessoa.codigoDaPessoa=Con.codigoDaPessoa
+            INNER JOIN assDadosParaCobranca Cob WITH (NOLOCK) ON con.identificadorCobranca = Cob.identificadorCobranca
+            INNER JOIN cadTiposDeDadoParaCobranca TCob WITH (NOLOCK) ON Cob.codigoTipoCobranca = TCob.codigoTipoCobranca
+            LEFT OUTER JOIN cadPortadores Por WITH (NOLOCK) ON fin.portador = Por.codigoDaPessoa
+          WHERE Con.situacaoDoContrato = 1 and fin.situacao = 1 and TCob.codigoTipoCobranca not in (0,4) 
+        ";
+    } elseif ($tipoCob == '2') {
+      $sql =
+        "SELECT fin.numeroDoContrato, fin.numeroDaParcela, Con.quantidadeDeParcelasDoContrato AS numeroDeParcelas, fin.numeroBancario, TRIM(pessoa.email) AS email,
           fin.numeroLoteRemessa, Con.codigoDaPessoa, nomeRazaoSocial, fin.dataDoVencimento, boleto.emailEnvioBoleto,
-          fin.valorDaParcela, pessoa.identMF AS CpfCnpj, fin.portador AS codigoDoPortador,
+          fin.valorDaParcela, pessoa.identMF AS CpfCnpj, fin.portador AS codigoDoPortador, Por.nomePortador,
           CASE 
             WHEN fin.valorDaParcela = fin.saldoValorParcela THEN '0.00'
             WHEN fin.saldoValorParcela = 0 THEN '0.00'
@@ -52,19 +82,24 @@ class CirLembreteCobranca
               WHEN Pl.descricaoDoPlanoDePagamento LIKE '%MEN%' THEN 'Mensal' END AS Plano, 
           CASE WHEN Con.tipoDeContrato = 'I' THEN 'Inclusão' WHEN Con.tipoDeContrato = 'R' THEN 'Renovação' END AS Tipo
         FROM assFinanceiroDoContrato fin WITH(NOLOCK)
+          INNER JOIN assBoletaBancaria boleto WITH(NOLOCK) ON boleto.identificadorCobranca = fin.identificadorCobranca
           INNER JOIN assContratos Con WITH(NOLOCK) ON Con.numeroDoContrato = fin.numeroDoContrato
           INNER JOIN cadPlanoDePagamento Pl WITH (NOLOCK) ON Pl.codigoDoPlanoDePagamento = Con.codigoDoPlanoDePagamento
           INNER JOIN vCadPessoaFisicaJuridica pessoa WITH(NOLOCK) ON pessoa.codigoDaPessoa=Con.codigoDaPessoa
+          INNER JOIN vCadEnderecoDeEntrega ender ON Con.codigoDaPessoa = ender.codigoDaPessoa AND pessoa.codigoDoLogradouro = ender.codigoDoLogradouro
+          INNER JOIN assCodigoDeBarrasUnificado barra WITH(NOLOCK) ON fin.numeroBancario = barra.numeroBancario
           INNER JOIN assDadosParaCobranca Cob WITH (NOLOCK) ON con.identificadorCobranca = Cob.identificadorCobranca
           INNER JOIN cadTiposDeDadoParaCobranca TCob WITH (NOLOCK) ON Cob.codigoTipoCobranca = TCob.codigoTipoCobranca
-        WHERE Con.situacaoDoContrato = 1 AND fin.situacao = 1 AND TCob.codigoTipoCobranca NOT IN (0,4)
+          LEFT OUTER JOIN cadPortadores Por WITH (NOLOCK) ON fin.portador = Por.codigoDaPessoa
+        WHERE Con.situacaoDoContrato = 1 AND fin.situacao = 1 AND ender.status = 'A'
       ";
+    }
 
     $where = [];
     $params = [];
 
     if ($dtInicio == '' && $dtFim == '') {
-      $where[] = 'fin.dataDoVencimento = CONVERT(DATE, DATEADD(DAY, 5, GETDATE()))';
+      $where = 'fin.dataDoVencimento = CONVERT(DATE, DATEADD(DAY, 5, GETDATE()))';
     }
     if (!empty($dtInicio) && $dtFim == '') {
       $where[] = 'fin.dataDoVencimento = :dtInicio';
@@ -119,20 +154,20 @@ class CirLembreteCobranca
       $DiasVencimento = $diff->format('%R%a'); // %R: sinal (+ ou -), %a: total de dias
 
       // Recupera os dados enviados via POST
-      $contrato       = $boletos[0]['numeroDoContrato'] ?? null;
-      $dataVencimento = $boletos[0]['dataDoVencimento'] ?? null;
-      $valor          = $boletos[0]['valorDaParcela'] ?? null;
-      $sequencial     = $boletos[0]['numeroBancario'] ?? null;
-      $sacadoNome     = isset($boletos[0]['nomeRazaoSocial']) ? urldecode($boletos[0]['nomeRazaoSocial']) : null;
-      $sacadoCpf      = $boletos[0]['CpfCnpj'] ?? null;
-      $sacadoEndereco = isset($boletos[0]['Endereco']) ? urldecode($boletos[0]['Endereco']) : null;
-      $sacadoCep      = $boletos[0]['Cep'] ?? null;
-      $sacadoCidade   = $boletos[0]['Cidade'] ?? null;
-      $sacadoUf       = $boletos[0]['UF'] ?? null;
-      $descontos      = $boletos[0]['Descontos'] ?? null;
+      $contrato        = $boletos[0]['numeroDoContrato'] ?? null;
+      $dataVencimento  = $boletos[0]['dataDoVencimento'] ?? null;
+      $valor           = $boletos[0]['valorDaParcela'] ?? null;
+      $sequencial      = $boletos[0]['numeroBancario'] ?? null;
+      $sacadoNome      = isset($boletos[0]['nomeRazaoSocial']) ? urldecode($boletos[0]['nomeRazaoSocial']) : null;
+      $sacadoCpf       = $boletos[0]['CpfCnpj'] ?? null;
+      $sacadoEndereco  = isset($boletos[0]['Endereco']) ? urldecode($boletos[0]['Endereco']) : null;
+      $sacadoCep       = $boletos[0]['Cep'] ?? null;
+      $sacadoCidade    = $boletos[0]['Cidade'] ?? null;
+      $sacadoUf        = $boletos[0]['UF'] ?? null;
+      $descontos       = $boletos[0]['Descontos'] ?? null;
       $numeroDaParcela = $boletos[0]['numeroDaParcela'] ?? null;
-      $NumDocumento   = $contrato . '0' . $numeroDaParcela;
-      $CodPortador    = $boletos[0]['codigoDoPortador'];
+      $NumDocumento    = $contrato . '0' . $numeroDaParcela;
+      $CodPortador     = $boletos[0]['codigoDoPortador'];
 
       // Verifica se os dados mínimos foram enviados
       if (!$contrato || !$dataVencimento || !$valor || !$sequencial || !$sacadoNome) {
@@ -220,24 +255,25 @@ class CirLembreteCobranca
       // Envio
       $html = $boleto->getOutput();
       $css = '<style>
-      @page {
-        size: A4 !important;
-        margin: 0 2mm !important;
-      }
-      @media print {
-        html, body {
-          width: 210mm;
-          height: 297mm;
+        @page {
+          size: A4 !important;
+          margin: 0 2mm !important;
         }
-      }
-      </style>';
+        @media print {
+          html, body {
+            width: 210mm;
+            height: 297mm;
+          }
+        }
+        </style>';
+
       $nomeArquivo = 'Boleto_' . $contrato . '-' . $numeroDaParcela . '.pdf';
       $html = $css . $html;
       $dompdf = new Dompdf();
       $dompdf->loadHtml($html);
       $dompdf->setPaper('A4', 'portrait');
       $dompdf->render();
-      $caminhoArquivo = __DIR__ . '/../includes/BoletosPdf/' . $nomeArquivo; // você pode alterar o caminho se quiser
+      $caminhoArquivo = __DIR__ . '/../../uploads/' . $nomeArquivo; // você pode alterar o caminho se quiser
       file_put_contents($caminhoArquivo, $dompdf->output());
 
       // Ajusta Mensagem de acordo com o vencimento
@@ -248,25 +284,24 @@ class CirLembreteCobranca
         $mensagem = 'Listamos abaixo as parcelas vencidas à ' . $QtdDias . ' dias:';
       }
 
-      $TabelaBoletos = '
-      <table cellpadding="8" cellspacing="0" style="width: 50%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px; border: 1px solid #ddd;">
-        <thead>
-          <tr style="background-color:rgb(242, 242, 242); text-align: left; color: #333; border-bottom: 2px solid #ccc;">
-            <th style="padding: 10px; border: 1px solid #ddd;">Assinatura</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Parcela</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Valor</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Vencimento</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="background-color: #fff; border-bottom: 1px solid #eee;">
-            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' . $Plano . '</td>
-            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' . $Parcela . '</td>
-            <td style="padding: 10px; border: 1px solid #ddd; text-align: right; "><span style="float: left;">R$ </span> ' . $Valor . '</td>
-            <td style="padding: 10px; border: 1px solid #ddd; text-align: center; ">' . $DtVenc . '</td>
-          </tr>
-        </tbody>
-      </table>';
+      $TabelaBoletos = '<table cellpadding="8" cellspacing="0" style="width: 50%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px; border: 1px solid #ddd;">
+          <thead>
+            <tr style="background-color:rgb(242, 242, 242); text-align: left; color: #333; border-bottom: 2px solid #ccc;">
+              <th style="padding: 10px; border: 1px solid #ddd;">Assinatura</th>
+              <th style="padding: 10px; border: 1px solid #ddd;">Parcela</th>
+              <th style="padding: 10px; border: 1px solid #ddd;">Valor</th>
+              <th style="padding: 10px; border: 1px solid #ddd;">Vencimento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background-color: #fff; border-bottom: 1px solid #eee;">
+              <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' . $Plano . '</td>
+              <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' . $Parcela . '</td>
+              <td style="padding: 10px; border: 1px solid #ddd; text-align: right; "><span style="float: left;">R$ </span> ' . $Valor . '</td>
+              <td style="padding: 10px; border: 1px solid #ddd; text-align: center; ">' . $DtVenc . '</td>
+            </tr>
+          </tbody>
+        </table>';
 
       $CorpoEmail = '<!doctype html>
         <html>
@@ -321,6 +356,7 @@ class CirLembreteCobranca
         </html> ';
 
       $mail = new PHPMailer(true);
+
       try {
         // ATIVAR LOG DETALHADO
         $mail->SMTPDebug = 2;
@@ -328,39 +364,57 @@ class CirLembreteCobranca
 
         // Configurações do servidor SMTP
         $mail->isSMTP();
-        $mail->CharSet = 'UTF-8';
+        $mail->CharSet  = 'UTF-8';
         $mail->Encoding = 'base64';
-        $mail->Host = 'webmail.diariodaregiao.com.br';
+        $mail->Host     = 'mail2.diariodaregiao.com.br';
         $mail->SMTPAuth = true;
-        $mail->addEmbeddedImage('imagens/logo.jpg', 'logoempresa');
-        $mail->addCustomHeader("Return-Receipt-To", "cad@diariodaregiao.com.br");
-        $mail->addCustomHeader("Disposition-Notification-To", "cad@diariodaregiao.com.br");
         $mail->Username = 'cad@diariodaregiao.com.br';
         $mail->Password = 'cadDiario2016';
         $mail->SMTPSecure = 'ssl';
         $mail->Port = 465;
+        $mail->addEmbeddedImage(__DIR__ . '/../../img/logo.jpg', 'logoempresa');
+        $mail->addCustomHeader("Return-Receipt-To", "cad@diariodaregiao.com.br");
+        $mail->addCustomHeader("Disposition-Notification-To", "cad@diariodaregiao.com.br");
 
         // Remetente e destinatário
         $mail->setFrom('cad@diariodaregiao.com.br', 'Grupo Diário da Região');
-        // $mail->addBCC('ti@diariodaregiao.com.br');
-        $mail->addAddress('ti@diariodaregiao.com.br');
+        $mail->addBCC('ti@diariodaregiao.com.br');
+        $mail->addAddress('ti@diariodaregiao.com.br', 'TI');
         // $mail->addAddress(trim($Email), trim($NomeCli));
 
         if ($envPdf === '2') {
           // Anexo
           $mail->addAttachment($caminhoArquivo, $nomeArquivo);
         }
+
         // Conteúdo do email
         $mail->isHTML(true);
         $mail->Subject = $Assunto;
         $mail->Body    = $CorpoEmail;
 
+        $mail->SMTPOptions = [
+          'ssl' => [
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true
+          ]
+        ];
+
         $mail->send();
-        $msg = "Email enviado com sucesso para $NomeCli <$Email>!";
+        if ($envPdf === '1') {
+          $msg = "Email enviado com sucesso para $NomeCli <$Email> - $contrato!!!";
+        } elseif ($envPdf === '2') {
+          $msg = "Email enviado com Boleto em anexo, com sucesso para $NomeCli <$Email> - $contrato!!!";
+        }
       } catch (Exception $e) {
         $msg = "Erro ao enviar o email: {$mail->ErrorInfo}";
       }
+      $mensagens[] = $msg;
+      
+      unlink($caminhoArquivo);
     }
-    unlink($caminhoArquivo);
+    // Adiciona cada mensagem em um array
+
+    return $mensagens;
   }
 }

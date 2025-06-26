@@ -34,8 +34,10 @@ if (isset($_POST['btn-buscar'])) {
   }), 'codigoDaPessoa')));
 } elseif (isset($_POST['btn-envia'])) {
   $dados = $_POST;
-
+  
   $enviaEmail = $LembreteCob->enviaEmail($dados);
+  $TotalEnv = COUNT($enviaEmail);
+  $mensagem = implode("\n", $enviaEmail);
 }
 
 // Inclui o header da página
@@ -108,9 +110,11 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="card-footer d-flex justify-content-end">
           <form action="<?= $URL ?>" method="post">
             <input type="hidden" id="selected_ids" name="selected_ids" required>
-            <button type="submit" id="btn-envia" name="btn-envia" class="btn btn-success btn-sm" value=1 onclick="setSelectedIds()">Enviar Somente E-Mail</button>
-
-            <button type="submit" id="btn-enviapdf" name="btn-envia" class="btn btn-success btn-sm" value=2 onclick="setSelectedIds()">Enviar E-Mail Com Boleto</button>
+            <?php if ($dados['tipoCob'] <> '2') : ?>
+              <button type="submit" id="btn-envia" name="btn-envia" class="btn btn-success btn-sm" value=1 onclick="setSelectedIds()">Enviar Somente E-Mail</button>
+            <?php elseif ($dados['tipoCob'] == '2') : ?>
+              <button type="submit" id="btn-enviapdf" name="btn-envia" class="btn btn-success btn-sm" value=2 onclick="setSelectedIds()">Enviar E-Mail Com Boleto</button>
+            <?php endif; ?>
           </form>
         </div>
         <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
@@ -122,6 +126,7 @@ require_once __DIR__ . '/../includes/header.php';
               <th scope="col">E-Mail</th>
               <th scope="col">Vencimento</th>
               <th scope="col">Plano / Tipo</th>
+              <th scope="col">Portador</th>
               <th scope="col">Tipo Cob.</th>
               <th scope="col">Valor</th>
               <th scope="col"><input type="checkbox" id="selectAll" name="selectAll" onclick="toggleSelectAll(this, this.closest('table'))"></th>
@@ -129,6 +134,7 @@ require_once __DIR__ . '/../includes/header.php';
           </thead>
           <tbody>
             <?php foreach ($dadosAgrupados as $item) : ?>
+              <?php //depurar($item) ?>
               <tr>
                 <td><?= $item['numeroDoContrato'] ?></td>
                 <td><?= $item['codigoDaPessoa'] ?></td>
@@ -136,6 +142,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <td><?= $item['email'] ?></td>
                 <td><?= date('d/m/Y', strtotime($item['dataDoVencimento'])) ?></td>
                 <td style="white-space: nowrap;"><?= $item['Plano'] ?> / <?= $item['Tipo'] ?></td>
+                <td style="white-space: nowrap;"><?= $item['nomePortador'] ?></td>
                 <td style="white-space: nowrap;"><?= $item['descricaoTipoCobranca'] ?></td>
                 <td style="text-align: right;"><span style="float: left;">R$ </span><?= number_format($item['valorDaParcela'], 2, ',', '.') ?></td>
                 <td>
@@ -150,12 +157,13 @@ require_once __DIR__ . '/../includes/header.php';
                                                                       'numeroDeParcelas' => trim($item['numeroDeParcelas']),
                                                                       'dataDoVencimento' => trim($item['dataDoVencimento']),
                                                                       'numeroBancario' => trim($item['numeroBancario']),
+                                                                      // 'numeroDaRemessa' => trim($item['codigoDaRemessa']),
                                                                       'valorDaParcela' => trim($item['valorDaParcela']),
                                                                       'CpfCnpj' => trim($item['CpfCnpj']),
-                                                                      'Endereco' => urlencode($item['endereco']),
-                                                                      'Cep' => trim($item['cep']),
-                                                                      'Cidade' => trim($item['nomeDoMunicipio']),
-                                                                      'UF' => trim($item['siglaDaUF']),
+                                                                      // 'Endereco' => urlencode($item['endereco']),
+                                                                      // 'Cep' => trim($item['cep']),
+                                                                      // 'Cidade' => trim($item['nomeDoMunicipio']),
+                                                                      // 'UF' => trim($item['siglaDaUF']),
                                                                       'Descontos' => trim($item['descontos']),
                                                                       'codigoDoPortador' => trim($item['codigoDoPortador'])
                                                                     ])) ?>">
@@ -170,6 +178,33 @@ require_once __DIR__ . '/../includes/header.php';
   </div>
 <?php endif; ?>
 
+<?php if (!empty($TotalEnv)): ?>
+  <div class="container d-flex justify-content-center filter-fields">
+    <div class="col col-sm-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-header bg-primary text-white">
+            Envio de E-Mail Concluído: <?= $TotalEnv ?> E-Mails Enviados
+          </h5>
+          <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
+            <thead>
+              <tr class="table-primary">
+                <th scope="col">E-Mail Enviado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($enviaEmail as $key => $value): ?>
+                <tr>
+                  <td><?= $value ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+<?php endif; ?>
 <!-- Inclui JavaScript -->
 <script src="<?= URL_PRINCIPAL ?>js/cir_lembretecob.js"></script>
 
