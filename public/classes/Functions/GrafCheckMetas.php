@@ -45,7 +45,7 @@ class GraficaCheckMetas
         CASE 
           WHEN LTRIM(RTRIM(ISNULL(Cli.apecli, ''))) = '' THEN RTRIM(Cli.nomcli)
           ELSE RTRIM(Cli.apecli)
-        END + '  (' + LTRIM(RTRIM(CAST(Cli.cgccpf AS VARCHAR))) + ')' AS Cliente,
+        END + ' (' + LTRIM(RTRIM(CAST(Cli.cgccpf AS VARCHAR))) + ')' AS Cliente,
         CASE 
           WHEN Ped.codven = '' THEN Ped.codcrt 
           ELSE Ped.codven
@@ -142,9 +142,7 @@ class GraficaCheckMetas
       . "\n " . $queryPadrao  . "\n " . $queryProduto
       . "\n " . $whereProduto . "\n " . $filtro;
 
-    // echo "<pre>";
-    // var_dump($sql);
-    // die();
+      // depurar($sql);
 
     // 4) executa e devolve
     $stmt = $this->senior->prepare($sql);
