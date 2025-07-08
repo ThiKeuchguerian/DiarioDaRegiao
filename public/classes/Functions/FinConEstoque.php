@@ -70,7 +70,7 @@ class ConsultaEstoque
 
     return $periodos;
   }
-    /**
+  /**
    * Gera o Período de acordo com mesAno passado
    * @param string $mesAno
    * @return array
@@ -176,6 +176,55 @@ class ConsultaEstoque
     }
     // depurar($params, $sql);
     $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  public function consultaEstoqueES($dados): array
+  {
+    $codDep = $dados['Deposito'];
+    $codFam = $dados['Familia'];
+    $mesAno = $dados['MesAno'];
+
+    // Separa o mês e o ano
+    list($mes, $ano) = explode('/', $mesAno);
+
+    // Cria um objeto DateTime a partir do primeiro dia do mês
+    $data = DateTime::createFromFormat('Y-m-d', $ano . '-' . $mes . '-01');
+
+    // O primeiro mês é o próprio mês informado
+    $mesAno2 = $data->format('m/Y');
+
+    // Subtrai um mês para calcular o mês anterior
+    $data->modify('-1 month');
+    $mesAno1 = $data->format('m/Y');
+
+    $params = [
+      ':CodDep'  => $codDep,
+      ':MesAno1' => $mesAno1,
+      ':MesAno2' => $mesAno2
+    ];
+
+    $sql =
+      "SELECT P.CODFAM, F.DESFAM, M.CODPRO, P.DESPRO, M.QTDEST, M.QTDANT, M.QTDMOV, M.VLRMOV, M.ESTEOS, FORMAT(DATMOV, 'MM/yyyy') AS MESMOV 
+        FROM e210mvp M
+          INNER JOIN E075PRO P ON P.CODEMP = M.CODEMP AND P.CODPRO = M.CODPRO
+          INNER JOIN E075DER D ON D.CODEMP = M.CODEMP AND D.CODPRO = M.CODPRO AND D.CODDER = M.CODDER
+          INNER JOIN E012FAM F ON F.CODEMP = P.CODEMP AND F.CODFAM = P.CODFAM
+        WHERE M.CODEMP = 1 AND M.FILDEP = 1
+          AND M.ESTMOV IN ('NO','NR','NB') AND CODDEP = :CodDep
+          AND FORMAT(DATMOV, 'MM/yyyy') IN (:MesAno1, :MesAno2)
+      ";
+
+    if ($codFam != 0) {
+      $sql .= " AND P.CODFAM = :codFam ";
+      $params[':codFam'] = $codFam;
+    }
+
+    $sql .= " ORDER BY P.CODFAM, M.CODPRO";
+    
+    $stmt = $this->senior->prepare($sql);
+    $stmt->execute($params);
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 }
