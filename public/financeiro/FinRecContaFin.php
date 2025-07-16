@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../classes/Functions/FinRecContaFin.php';
 
-$Titulo = 'Faturamento - Conta Financeira';
+$Titulo = 'Recebimento - Conta Financeira';
 $URL = URL_PRINCIPAL . 'financeiro/FinRecContaFin.php';
 
 // Instanciar a classe
