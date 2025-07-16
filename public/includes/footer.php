@@ -1,3 +1,6 @@
+<!-- Footer -->
 
+</style>
 </body>
+
 </html>

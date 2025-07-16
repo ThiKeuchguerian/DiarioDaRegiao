@@ -11,7 +11,7 @@
     <a href="financeiro/FinConEstoqueES.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Estoque (Entrada/Saída) </a>
     <div class="mb-3"></div>
     <!-- <a href="FinanceiroFatContaFin.php" class="btn btn-primary btn-sm" style="color: white;"> Faturamento - Conta Financeira </a> -->
-    <!-- <a href="FinanceiroRecContaFin.php" class="btn btn-primary btn-sm" style="color: white;"> Recebimento - Conta Financeira </a> -->
+    <a href="financeiro/FinRecContaFin.php" class="btn btn-primary btn-sm" style="color: white;"> Recebimento - Conta Financeira </a>
     <div class="mb-3"></div>
     <!-- <a href="FinanceiroRecGrafica.php" class="btn btn-primary btn-sm" style="color: white;"> Recebimento - Gráfica </a> -->
     <!-- <a href="GraficaFaturamentoAnual.php" class="btn btn-primary btn-sm" style="color: white;">Faturamento Gráfica Anual/Resumo</a> -->
