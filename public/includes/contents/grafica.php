@@ -6,7 +6,7 @@
     <a href="grafica/GrafComissao.php" class="btn btn-primary btn-sm" style="color: white;">Comissão Gráfica - Recebimento</a>
     <a href="grafica/GrafComissaoNota.php" class="btn btn-primary btn-sm" style="color: white;">Comissão Gráfica - Nota</a>
     <div class="mb-3"></div>
-    <!-- <a href="grafica/GrafFaturamento.php" class="btn btn-primary btn-sm" style="color: white;">Faturamento Gráfica</a> -->
+    <a href="grafica/GrafFaturamento.php" class="btn btn-primary btn-sm" style="color: white;">Faturamento Gráfica</a>
     <!-- <a href="grafica/GrafFaturamentoAnual.php" class="btn btn-primary btn-sm" style="color: white;">Faturamento Gráfica Anual/Resumo</a> -->
     <div class="mb-3"></div>
     <!-- <a href="grafica/GrafProducao.php" class="btn btn-primary btn-sm" style="color: white;">Produção Gráfica</a> -->
