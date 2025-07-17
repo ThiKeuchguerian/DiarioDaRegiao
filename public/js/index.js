@@ -1,24 +1,26 @@
 document.addEventListener('DOMContentLoaded', function () {
+  const btnAnalitico = document.getElementById('menu-analitico');
+  const btnArtes = document.getElementById('menu-artes');
   const btnCirculacao = document.getElementById('menu-circulacao');
-  const btnDistribuicao = document.getElementById('menu-distribuicao');
   const btnClassificados = document.getElementById('menu-classificados');
   const btnComercial = document.getElementById('menu-comercial');
   const btnContabilidade = document.getElementById('menu-contabilidade');
+  const btnDistribuicao = document.getElementById('menu-distribuicao');
   const btnFinanceiro = document.getElementById('menu-financeiro');
   const btnGrafica = document.getElementById('menu-grafica');
   const btnAtex = document.getElementById('menu-atex');
-  const btnArtes = document.getElementById('menu-artes');
   const btnTi = document.getElementById('menu-ti');
 
+  const btnMobileArtes = document.getElementById('menumobile-artes');
+  const btnMobileAnalitico = document.getElementById('menumobile-analitico');
   const btnMobileCirculacao = document.getElementById('menumobile-circulacao');
-  const btnMobileDistribuicao = document.getElementById('menumobile-distribuicao');
   const btnMobileClassificados = document.getElementById('menumobile-classificados');
   const btnMobileComercial = document.getElementById('menumobile-comercial');
   const btnMobileContabilidade = document.getElementById('menumobile-contabilidade');
+  const btnMobileDistribuicao = document.getElementById('menumobile-distribuicao');
   const btnMobileFinanceiro = document.getElementById('menumobile-financeiro');
   const btnMobileGrafica = document.getElementById('menumobile-grafica');
   const btnMobileAtex = document.getElementById('menumobile-atex');
-  const btnMobileArtes = document.getElementById('menumobile-artes');
   const btnMobileTi = document.getElementById('menumobile-ti');
 
   const offcanvasElement = document.getElementById('mobileMenu');
@@ -40,16 +42,22 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Event Listeners para o menu lateral
+  if (btnAnalitico) {
+    btnAnalitico.addEventListener('click', () => {
+      ocultarOutrosConteudos();
+      exibirConteudo('conteudo-analitico')
+    });
+  }
+  if (btnArtes) {
+    btnArtes.addEventListener('click', () => {
+      ocultarOutrosConteudos();
+      exibirConteudo('conteudo-artes')
+    });
+  }
   if (btnCirculacao) {
     btnCirculacao.addEventListener('click', () => {
       ocultarOutrosConteudos();
       exibirConteudo('conteudo-circulacao')
-    });
-  }
-  if (btnDistribuicao) {
-    btnDistribuicao.addEventListener('click', () => {
-      ocultarOutrosConteudos();
-      exibirConteudo('conteudo-distribuicao')
     });
   }
   if (btnClassificados) {
@@ -70,7 +78,13 @@ document.addEventListener('DOMContentLoaded', function () {
       exibirConteudo('conteudo-contabilidade')
     });
   }
-  if (btnContabilidade) {
+  if (btnDistribuicao) {
+    btnDistribuicao.addEventListener('click', () => {
+      ocultarOutrosConteudos();
+      exibirConteudo('conteudo-distribuicao')
+    });
+  }
+  if (btnFinanceiro) {
     btnFinanceiro.addEventListener('click', () => {
       ocultarOutrosConteudos();
       exibirConteudo('conteudo-financeiro')
@@ -88,12 +102,6 @@ document.addEventListener('DOMContentLoaded', function () {
       exibirConteudo('conteudo-atex')
     });
   }
-  if (btnArtes) {
-    btnArtes.addEventListener('click', () => {
-      ocultarOutrosConteudos();
-      exibirConteudo('conteudo-artes')
-    });
-  }
   if (btnTi) {
     btnTi.addEventListener('click', () => {
       ocultarOutrosConteudos();
@@ -102,15 +110,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Event Listeners para o menu mobile
-  btnMobileCirculacao.addEventListener('click', () => {
+  btnMobileAnalitico.addEventListener('click', () => {
     ocultarOutrosConteudos();
-    exibirConteudo('conteudo-circulacao');
+    exibirConteudo('conteudo-analitico');
     offcanvas.hide();
   });
 
-  btnMobileDistribuicao.addEventListener('click', () => {
+  btnMobileArtes.addEventListener('click', () => {
     ocultarOutrosConteudos();
-    exibirConteudo('conteudo-distribuicao');
+    exibirConteudo('conteudo-artes');
+    offcanvas.hide();
+  });
+
+  btnMobileCirculacao.addEventListener('click', () => {
+    ocultarOutrosConteudos();
+    exibirConteudo('conteudo-circulacao');
     offcanvas.hide();
   });
 
@@ -132,6 +146,12 @@ document.addEventListener('DOMContentLoaded', function () {
     offcanvas.hide();
   });
 
+  btnMobileDistribuicao.addEventListener('click', () => {
+    ocultarOutrosConteudos();
+    exibirConteudo('conteudo-distribuicao');
+    offcanvas.hide();
+  });
+
   btnMobileFinanceiro.addEventListener('click', () => {
     ocultarOutrosConteudos();
     exibirConteudo('conteudo-financeiro');
@@ -147,12 +167,6 @@ document.addEventListener('DOMContentLoaded', function () {
   btnMobileAtex.addEventListener('click', () => {
     ocultarOutrosConteudos();
     exibirConteudo('conteudo-atex');
-    offcanvas.hide();
-  });
-
-  btnMobileArtes.addEventListener('click', () => {
-    ocultarOutrosConteudos();
-    exibirConteudo('conteudo-artes');
     offcanvas.hide();
   });
 

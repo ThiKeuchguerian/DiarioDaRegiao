@@ -18,6 +18,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
   <style>
     body {
@@ -233,6 +235,10 @@
       padding: 12px;
       margin-bottom: 15px;
       border-radius: 8px;
+    }
+
+    canvas {
+      max-width: 800px;
     }
   </style>
 </head>

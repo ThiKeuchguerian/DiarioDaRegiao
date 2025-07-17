@@ -4,6 +4,7 @@
 // Esse array define o “id” que você usará depois no JS,
 // o rótulo e, se for abrir em outra janela, um target.
 $menuItems = [
+  'analitico'     => 'Analítico',
   'artes'         => 'Artes',
   'circulacao'    => 'Circulação',
   'classificados' => 'Classificados',
