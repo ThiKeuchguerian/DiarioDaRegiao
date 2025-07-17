@@ -14,6 +14,18 @@ class DatabaseConnection
           $pass = 'dw';
           break;
 
+        case 'gdc':
+          $dsn = "sqlsrv:Server=10.64.0.11,1433;Database=gdc";
+          $user = 'dw';
+          $pass = 'dw';
+          break;
+
+        case 'gdcTeste':
+          $dsn = "sqlsrv:Server=10.64.0.14,1433;Database=gdc";
+          $user = 'dw';
+          $pass = 'dw';
+          break;
+
         case 'DrGestor':
           $dsn = "sqlsrv:Server=10.64.0.11,1433;Database=DrGestor";
           $user = 'dw';
