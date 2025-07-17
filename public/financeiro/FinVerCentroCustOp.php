@@ -13,25 +13,18 @@ if (isset($_POST['btn-buscar'])) {
   $numDoc = $_POST['NumOP'];
 
   if ($mesAno <> '' && $numDoc == '') {
-    // echo "<pre>";
-    // var_dump($mesAno, $numDoc);
-    // die();
     $buscaNumeroOp = $CentroCustoOrdermProducao->buscaNumeroOP($mesAno);
     // Pega todos os numdoc dos resultados
     $numDoc = array_unique(array_column($buscaNumeroOp, 'numdoc'));
 
     $consultaMovimentoEstoque = $CentroCustoOrdermProducao->movimentoEstoque($numDoc);
     $consultaOrdemProducao = $CentroCustoOrdermProducao->consultaOrdemProducao($numDoc);
-    // echo "<pre>";
-    // var_dump($numDoc, $consultaMovimentoEstoque);
-    // die();
+
     $dados = COUNT(array_unique(array_column($consultaOrdemProducao, 'numorp')));
   } else if ($mesAno == '' && $numDoc <> '') {
     $consultaMovimentoEstoque = $CentroCustoOrdermProducao->movimentoEstoque($numDoc);
     $consultaOrdemProducao = $CentroCustoOrdermProducao->consultaOrdemProducao($numDoc);
-    // echo "<pre>";
-    // var_dump($consultaMovimentoEstoque);
-    // die();
+
     $dados = COUNT(array_unique(array_column($consultaOrdemProducao, 'ChaveAgrup')));
   }
 
@@ -65,15 +58,25 @@ if (isset($_POST['btn-buscar'])) {
       }
     }
   }
-  // Contar quantos são IGUAIS
 
   $iguais = count(array_filter($agrupadoMvto, function ($item) {
-    return $item['master'][0]['codccu'] == $item['movimento'][0]['codccu'];
+    $codccuMaster = array_unique(array_column($item['master'], 'codccu'));
+    $codccuMov = array_unique(array_column($item['movimento'], 'codccu'));
+
+    sort($codccuMaster);
+    sort($codccuMov);
+
+    return $codccuMaster === $codccuMov;
   }));
 
-  // Contar quantos são DIFERENTES
   $diferentes = count(array_filter($agrupadoMvto, function ($item) {
-    return $item['master'][0]['codccu'] != $item['movimento'][0]['codccu'];
+    $codccuMaster = array_unique(array_column($item['master'], 'codccu'));
+    $codccuMov = array_unique(array_column($item['movimento'], 'codccu'));
+
+    sort($codccuMaster);
+    sort($codccuMov);
+
+    return $codccuMaster !== $codccuMov;
   }));
 }
 
@@ -134,25 +137,25 @@ require_once __DIR__ . '/../includes/header.php';
           O.P. Nº: <?= $numDoc ?> || Qtde. O.P.: <?= $dados ?>
         <?php endif; ?>
       </h5>
-      <?php foreach ($agrupadoMvto as $numorp): ?>
+      <?php foreach ($agrupadoMvto as $key => $numorp): ?>
         <?php if (count($numorp) > 0) : ?>
           <div class="card-body">
             <h5 class="card-header bg-primary text-white">
               O.P.: <?= $numorp['master'][0]['numorp'] ?> ||
-              Produto: <?= $numorp['master'][0]['codpro'] ?> - <?= $numorp['master'][0]['Produto'] ?> || <br>
+              Produto: <?= $numorp['master'][0]['codpro'] ?> - <?= $numorp['master'][0]['Produto'] ?><br>
               Qtde. Prod.: <?= number_format($numorp['master'][0]['QtdeProd'], 3, ',', '.') ?> ||
               C.Custo OP: <?= $numorp['master'][0]['codccu'] ?> ||
-              C.Custo Mov.: <?= $numorp['movimento'][0]['codccu'] ?> ||
-              <?php if ($numorp['master'][0]['codccu'] == $numorp['movimento'][0]['codccu']) : ?>
-                <span class="badge bg-success">OK</span>
-              <?php else : ?>
-                <span class="badge bg-danger">XX</span>
-              <?php endif; ?>
+              C.Custo Mov.: <?= $numorp['movimento'][0]['codccu'] ?>
             </h5>
-            <div class="row">
+            <div class="row g-2">
               <div class="col-md-6">
                 <h6 class="card-header bg-primary text-white">
-                  Componentes da O.P.
+                  Componentes da O.P. ||
+                  <?php if (count(array_unique(array_column($numorp['master'], 'codccu'))) === 1) : ?>
+                    Centro de Custo: <span class="badge bg-success">OK</span>
+                  <?php else : ?>
+                    Centro de Custo: <span class="badge bg-danger">XX</span>
+                  <?php endif; ?>
                 </h6>
                 <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
                   <thead>
@@ -183,7 +186,12 @@ require_once __DIR__ . '/../includes/header.php';
               </div>
               <div class="col-md-6">
                 <h6 class="card-header bg-primary text-white">
-                  Movimentação de Estoque
+                  Movimentação de Estoque ||
+                  <?php if (count(array_unique(array_column($numorp['movimento'], 'codccu'))) === 1) : ?>
+                    Centro de Custo: <span class="badge bg-success">OK</span>
+                  <?php else : ?>
+                    Centro de Custo: <span class="badge bg-danger">XX</span>
+                  <?php endif; ?>
                 </h6>
                 <table class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
                   <thead>
@@ -205,7 +213,7 @@ require_once __DIR__ . '/../includes/header.php';
                           <td><?= $mv['DescrFis'] ?></td>
                           <td><?= $mv['Tipo'] ?> -> <?= $mv['UM'] ?></td>
                           <td><?= date('d/m/Y', strtotime($mv['DtMovimento'])) ?></td>
-                          <td style="text-align: right;"><?= number_format($mv['QtdeMovi'], 3, '.', '') ?></td>
+                          <td style="text-align: right;"><?= number_format($mv['QtdeMovi'], 3, ',', '') ?></td>
                           <td style="text-align: right; white-space: nowrap;"><span style="float: left;">R$</span><?= number_format($mv['VlrMov'], 2, ',', '.') ?></td>
                           <td><?= $mv['codccu'] ?></td>
                         </tr>

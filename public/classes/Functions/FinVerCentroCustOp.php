@@ -118,7 +118,7 @@ class CentroCustoOrdermProducao
         $placeholders[] = $ph;
         $params[$ph] = $doc;
       }
-      $sql .= "\n WHERE cop.numorp IN (" . implode(', ', $placeholders) . ")";
+      $sql .= "\n WHERE cop.numorp IN (" . implode(', ', $placeholders) . ") AND cop.datger >= '20201231'";
     } else {
       $params = [':numDoc' => ($numDoc)];
       $sql .= "\n WHERE cop.numorp = :numDoc";
