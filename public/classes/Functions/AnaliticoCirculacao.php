@@ -14,7 +14,7 @@ class AnaliticoCirculacao
   public function consultaContratos(): array
   {
     $sql =
-      "SELECT
+      "SELECT C.numeroDoContrato,
         CASE 
           WHEN PP.descricaoDoPlanoDePagamento LIKE '%CBO%' THEN 'Combo'
           WHEN PP.descricaoDoPlanoDePagamento NOT LIKE '%CBO%' AND TA.codigoDoProdutoServico = 1 THEN 'Impresso'
@@ -44,7 +44,7 @@ class AnaliticoCirculacao
         WHERE C.dataDeValidadeInicial <= GETDATE() AND C.dataDevalidadeFinal >= GETDATE()
         AND C.situacaoDoContrato IN (1,3)
 
-        GROUP BY descricaoDoPlanoDePagamento, codigoDoProdutoServico, identMF, nomeRazaoSocial, nomeDoMunicipio, siglaDaUf, descricaoSituacao,
+        GROUP BY C.numeroDoContrato, descricaoDoPlanoDePagamento, codigoDoProdutoServico, identMF, nomeRazaoSocial, nomeDoMunicipio, siglaDaUf, descricaoSituacao,
           dataDaAssinatura, valorTotal, T.valorDaParcela, situacaoDoContrato, diaDeNascimento, mesDeNascimento, anoDeNascimento, sexo,
           descricaoTipoDeAssinatura, descricaoDoPlanoDePagamento, 
           C.dataDeValidadeInicial, C.dataDevalidadeFinal
