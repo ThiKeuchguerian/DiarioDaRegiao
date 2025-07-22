@@ -1,2 +1,5 @@
 /public/config/composer/
 /public/config/install.log
+/public/ti/cadena.ini
+/public/ti/info.php
+/public/ti/LerArquivoCadena.php
