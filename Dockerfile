@@ -45,6 +45,7 @@ RUN install-php-extensions opcache
 RUN install-php-extensions calendar
 RUN install-php-extensions sodium
 RUN install-php-extensions soap
+RUN install-php-extensions pdo_firebird
 
 # apache e SSL
 RUN a2enmod ssl && a2enmod rewrite
