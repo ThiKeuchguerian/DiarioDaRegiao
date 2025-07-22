@@ -34,7 +34,8 @@ require_once __DIR__ . '/../includes/header.php';
     ['dsn' => "sqlsrv:Server=172.16.0.15,1433;Database=WebTake;", 'usuario' => 'tecmidia', 'senha' => 'tecsams'],
     ['dsn' => "sqlsrv:Server=10.64.0.25\\SQLEXPRESS;Database=cadena;", 'usuario' => 'capt', 'senha' => 'capt'],
     ['dsn' => "sqlsrv:Server=10.64.0.7\\MICROSIGA;Database=PROTHEUS;", 'usuario' => 'totvs', 'senha' => 'totvs'],
-    ['dsn' => "mysql:host=168.138.157.203;port=3317;dbname=websquad;charset=utf8", 'usuario' => 'root', 'senha' => 'P0hRk6aON10f']
+    ['dsn' => "mysql:host=168.138.157.203;port=3317;dbname=websquad;charset=utf8", 'usuario' => 'root', 'senha' => 'P0hRk6aON10f'],
+    ['dsn' => "firebird:dbname=10.64.0.35:D:\\GI\\DB\\DIARIO.FDB;charset=UTF8", 'usuario' => 'sysdba', 'senha' => 'masterkey']
   ];
 
   // Testar conexões
