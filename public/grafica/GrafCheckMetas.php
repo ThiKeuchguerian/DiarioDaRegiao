@@ -11,9 +11,6 @@ $GraficaCheckMetas = new GraficaCheckMetas();
 if (isset($_POST['btn-buscar'])) {
   $ano = $_POST['Ano'];
   $tipo = $_POST['Tipo'];
-  // echo "<pre>";
-  // var_dump($ano, $tipo);
-  // die();
 
   $SomaAnual = $GraficaCheckMetas->consultaMetas($ano, $tipo);
   $Anual = COUNT($SomaAnual);
@@ -55,6 +52,11 @@ if (isset($_POST['btn-buscar'])) {
     $totais[$tipo][$mesAno] =
       ($totais[$tipo][$mesAno] ?? 0)
       + $valorNota;
+
+    // acumula valor no total geral do tipo → mes
+    $TotalGeral[$mesAno] =
+      ($TotalGeral[$mesAno] ?? 0)
+      + $valorNota;
   }
 
   // Ordenar os meses (se forem sempre 01/2025…12/2025 você pode gerar direto,
@@ -65,10 +67,6 @@ if (isset($_POST['btn-buscar'])) {
 } elseif (isset($_POST['btn-analitico'])) {
   $ano = $_POST['Ano'];
   $tipo = $_POST['Tipo'];
-
-  // echo "<pre>";
-  // var_dump($ano, $tipo);
-  // die();
 
   $consultaAnalitico = $GraficaCheckMetas->consultaMetas($ano, $tipo);
   $Analitico = COUNT($consultaAnalitico);
@@ -201,6 +199,59 @@ require_once __DIR__ . '/../includes/header.php';
 
 <!-- Exibindo Resultado Anual -->
 <?php if (isset($Anual)) : ?>
+  <div class="container">
+    <div class="card shadow-sm  h-100">
+      <h5 class="card-header bg-primary text-white">Total Geral: Embalagem/Comercial</h5>
+      <div class="card-body">
+        <table id="AnualGeral" class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
+          <thead>
+            <tr class="table-primary">
+              <?php foreach ($meses as $m) : ?>
+                <th style="white-space:nowrap;"><?= $m ?></th>
+              <?php endforeach; ?>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="table-primary">
+              <?php foreach ($meses as $m) : ?>
+                <?php $tv = $TotalGeral[$m] ?? 0 ?>
+                <td style="text-align: right; white-space:nowrap;"><span style="float: left;">R$</span><?= number_format($tv, 2, ',', '.') ?></td>
+              <?php endforeach; ?>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <?php foreach ($agrupado as $tipoServico => $clientes) : ?>
+    <div class="container">
+      <div class="card shadow-sm  h-100">
+        <h5 class="card-header bg-primary text-white"></h5>
+        <div class="card-body">
+          <table id="AnualGeral" class="table table-striped table-hover mb-0" style="border: 1px solid #ccc;">
+            <thead>
+              <tr class="table-primary">
+                <th>Serviço: <?= $tipoServico ?></th>
+                <?php foreach ($meses as $m) : ?>
+                  <th style="white-space:nowrap;"><?= $m ?></th>
+                <?php endforeach; ?>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="table-primary">
+                <th>Total Mês</th>
+                <?php foreach ($meses as $m) : ?>
+                  <?php $tv = $totais[$tipoServico][$m] ?? 0 ?>
+                  <td style="text-align: right; white-space:nowrap;"><span style="float: left;">R$</span><?= number_format($tv, 2, ',', '.') ?></td>
+                <?php endforeach; ?>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <?php endforeach; ?>
+  <div class="mb-3"></div>
   <?php foreach ($agrupado as $tipoServico => $clientes) : ?>
     <div class="container">
       <div class="card shadow-sm  h-100">
@@ -210,12 +261,22 @@ require_once __DIR__ . '/../includes/header.php';
             <thead>
               <tr class="table-primary">
                 <th>Nome Cliente</th>
-                <!-- <th>Cod. Cliente</th> -->
                 <?php foreach ($meses as $m) : ?>
                   <th style="white-space:nowrap;"><?= $m ?></th>
                 <?php endforeach; ?>
               </tr>
             </thead>
+            <tbody>
+              <?php foreach ($clientes as $cli) : ?>
+                <tr>
+                  <td><?= $cli['Cliente'] ?></td>
+                  <?php foreach ($meses as $m) : ?>
+                    <?php $v = $cli['meses'][$m] ?? 0 ?>
+                    <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($v, 2, ',', '.') ?></td>
+                  <?php endforeach; ?>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
             <tbody>
               <tr class="table-secondary">
                 <th>Total Mês</th>
@@ -224,18 +285,6 @@ require_once __DIR__ . '/../includes/header.php';
                   <td style="text-align: right; white-space:nowrap;"><span style="float: left;">R$</span><?= number_format($tv, 2, ',', '.') ?></td>
                 <?php endforeach; ?>
               </tr>
-            </tbody>
-            <tbody>
-              <?php foreach ($clientes as $cli) : ?>
-                <tr>
-                  <td><?= $cli['Cliente'] ?></td>
-                  <!-- <td><?= $cli['CodCli'] ?></td> -->
-                  <?php foreach ($meses as $m) : ?>
-                    <?php $v = $cli['meses'][$m] ?? 0 ?>
-                    <td style="text-align: right;"><span style="float: left;">R$</span><?= number_format($v, 2, ',', '.') ?></td>
-                  <?php endforeach; ?>
-                </tr>
-              <?php endforeach; ?>
             </tbody>
           </table>
         </div>
