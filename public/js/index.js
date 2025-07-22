@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnFinanceiro = document.getElementById('menu-financeiro');
   const btnGrafica = document.getElementById('menu-grafica');
   const btnAtex = document.getElementById('menu-atex');
+  const btnIntegracoes = document.getElementById('menu-integracoes');
   const btnTi = document.getElementById('menu-ti');
 
   const btnMobileArtes = document.getElementById('menumobile-artes');
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnMobileFinanceiro = document.getElementById('menumobile-financeiro');
   const btnMobileGrafica = document.getElementById('menumobile-grafica');
   const btnMobileAtex = document.getElementById('menumobile-atex');
+  const btnMobileIntegracoes = document.getElementById('menumobile-integracoes');
   const btnMobileTi = document.getElementById('menumobile-ti');
 
   const offcanvasElement = document.getElementById('mobileMenu');
@@ -102,6 +104,12 @@ document.addEventListener('DOMContentLoaded', function () {
       exibirConteudo('conteudo-atex')
     });
   }
+  if (btnIntegracoes) {
+    btnIntegracoes.addEventListener('click', () => {
+      ocultarOutrosConteudos();
+      exibirConteudo('conteudo-integracoes')
+    });
+  }
   if (btnTi) {
     btnTi.addEventListener('click', () => {
       ocultarOutrosConteudos();
@@ -170,10 +178,16 @@ document.addEventListener('DOMContentLoaded', function () {
     offcanvas.hide();
   });
 
+  btnMobileIntegracoes.addEventListener('click', () => {
+    ocultarOutrosConteudos();
+    exibirConteudo('conteudo-integracoes');
+    offcanvas.hide();
+  });
+
   btnMobileTi.addEventListener('click', () => {
     ocultarOutrosConteudos();
     exibirConteudo('conteudo-ti');
     offcanvas.hide();
   });
 });
-// Fim do código
+// Fim do código 

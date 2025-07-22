@@ -14,6 +14,7 @@ $menuItems = [
   'financeiro'    => 'Financeiro',
   'grafica'       => 'Gráfica',
   'atex'          => 'Sistemas Atex',
+  'integracoes'   => 'Integrações',
   'ti'            => 'Dept. T.I.',
 ];
 
