@@ -16,19 +16,11 @@ if (isset($_POST['btn-buscar'])) {
 
   $clienteGi = $IntegracaoClientes->consultaClientesGi($dados);
   $clientesCapt = $IntegracaoClientes->consultaClientesCapt($dados);
+  $clientesGestor = $IntegracaoClientes->consultaClientesGestor($dados);
   $clientesSenior = $IntegracaoClientes->consultaClientesSenior();
 
   $cpfSenior = array_column($clientesSenior, 'cgccpf');
   $cpfSeniorMap = array_flip($cpfSenior);
-
-  $clientesNaoEncontratdosCapt = [];
-  // Verificação com normalização
-  foreach ($clientesCapt as $cliente) {
-    $cpfCapt = ($cliente['cpfCnpj']);
-    if (!isset($cpfSeniorMap[$cpfCapt])) {
-      $clientesNaoEncontratdosCapt[] = $cliente;
-    }
-  }
 
   $clientesNaoEncontratdosGi = [];
   // Verificação com normalização
@@ -39,10 +31,28 @@ if (isset($_POST['btn-buscar'])) {
     }
   }
 
+  $clientesNaoEncontratdosCapt = [];
+  // Verificação com normalização
+  foreach ($clientesCapt as $cliente) {
+    $cpfCapt = ($cliente['cpfCnpj']);
+    if (!isset($cpfSeniorMap[$cpfCapt])) {
+      $clientesNaoEncontratdosCapt[] = $cliente;
+    }
+  }
+
+  $clientesNaoEncontratdosGestor = [];
+  // Verificação com normalização
+  foreach ($clientesGestor as $cliente) {
+    $cpfGestor = ($cliente['identMF']);
+    if (!isset($cpfSeniorMap[$cpfGestor])) {
+      $clientesNaoEncontratdosGestor[] = $cliente;
+    }
+  }
   // $clientesNaoEncontratdos = array_merge($clientesNaoEncontratdosCapt, $clientesNaoEncontratdosGi);
-  $TotalCapt = count($clientesNaoEncontratdosCapt);
   $TotalGi = count($clientesNaoEncontratdosGi);
-  $Total = count($clientesNaoEncontratdosCapt) + count($clientesNaoEncontratdosGi);
+  $TotalCapt = count($clientesNaoEncontratdosCapt);
+  $TotalGestor = count($clientesNaoEncontratdosGestor);
+  $Total = count($clientesNaoEncontratdosCapt) + count($clientesNaoEncontratdosGi) + count($clientesNaoEncontratdosGestor);
 } else if (isset($_POST['btn-integracli'])) {
   $dados = $_POST;
 
@@ -82,8 +92,6 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="card-footer d-flex justify-content-end">
           <div class="col text-end">
             <button id="btn-buscar" name="btn-buscar" type="submit" class="btn btn-primary btn-sm">Buscar</button>
-            <button id="btn-analitico" name="btn-analitico" type="submit" class="btn btn-primary btn-sm">Analítico</button>
-            <button id="btn-exportar" name="btn-exportar" type="submit" class="btn btn-success btn-sm">Exportar</button>
             <a class="btn btn-primary btn-sm" href="<?= URL_PRINCIPAL ?>">Voltar</a>
           </div>
         </div>
@@ -98,105 +106,170 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Exibindo Resultado -->
 <?php if (!empty($Total)) : ?>
   <div class="container">
-    <div class="card shadow-sm h-100">
-      <div class="card-body">
-        <h5 class="card-header bg-primary text-white">
-          Clientes Capt Não Integrados: <?= $TotalCapt ?>||
-        </h5>
-        <div class="card-footer d-flex justify-content-end">
-          <form action="<?= $URL ?>" method="post">
-            <input type="hidden" id="selected_ids" name="selected_ids" required>
-            <button type="submit" id="btn-integracli" name="btn-integracli" class="btn btn-success btn-sm" value=1 onclick="setSelectedIds()">Integra Clientes</button>
-          </form>
-        </div>
-        <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
-          <thead>
-            <tr class="table-primary">
-              <th scope="col">Código</th>
-              <th scope="col">Nome Cliente</th>
-              <th scope="col">Nome Fantasia/Apelido</th>
-              <th scope="col">Cpf/Cnpj</th>
-              <th scope="col">I.E.</th>
-              <th scope="col">Telefone</th>
-              <th scope="col">Celular</th>
-              <th scope="col">E-Mail</th>
-              <th scope="col">Cod. Ven</th>
-              <th scope="col">Dt. Cadastro</th>
-              <th scope="col"><input type="checkbox" id="selectAll" name="selectAll" onclick="toggleSelectAll(this, this.closest('table'))"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($clientesNaoEncontratdosCapt as $item) : ?>
-              <tr>
-                <td><?= $item['codCliente'] ?></td>
-                <td><?= $item['razaoSocial'] ?></td>
-                <td><?= $item['nomeFantasia'] ?></td>
-                <td><?= $item['cpfCnpj'] ?></td>
-                <td><?= $item['inscrEstadual'] ?></td>
-                <td><?= "(" . $item['telefoneFixoDDD'] . ")" . $item['telefoneFixoNro'] ?></td>
-                <td><?= "(" . $item['celularDDD'] . ")" . $item['celularNro'] ?></td>
-                <td><?= strlen(trim($item['email'])) > 25 ? substr(trim($item['email']), 0, 25) . '...' : trim($item['email']) ?></td>
-                <td><?= trim($item['codVendedor']) ?></td>
-                <td><?= date('d/m/Y', strtotime($item['dataCadastro'])) ?></td>
-                <td><input type="checkbox" name="selected[]" value='<?= htmlspecialchars(json_encode($item)) ?>'></td>
+    <?php if (!empty($TotalGi)) : ?>
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-header bg-primary text-white">
+            Clientes GI Não Integrados: <?= $TotalGi ?>||
+          </h5>
+          <div class="card-footer d-flex justify-content-end">
+            <form action="<?= $URL ?>" method="post">
+              <input type="hidden" id="selected_ids" name="selected_ids" required>
+              <button type="submit" id="btn-integracli" name="btn-integracli" class="btn btn-success btn-sm" value=1 onclick="setSelectedIds()">Integra Clientes</button>
+            </form>
+          </div>
+          <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
+            <thead>
+              <tr class="table-primary">
+                <th scope="col">Código</th>
+                <th scope="col">Nome Cliente</th>
+                <th scope="col">Nome Fantasia/Apelido</th>
+                <th scope="col">Cpf/Cnpj</th>
+                <th scope="col">I.E.</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">Celular</th>
+                <th scope="col">E-Mail</th>
+                <th scope="col">Cod. Ven</th>
+                <th scope="col">Dt. Cadastro</th>
+                <th scope="col"><input type="checkbox" id="selectAll" name="selectAll" onclick="toggleSelectAll(this, this.closest('table'))"></th>
               </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-      <div class="card-body">
-        <h5 class="card-header bg-primary text-white">
-          Clientes GI Não Integrados: <?= $TotalGi ?>||
-        </h5>
-        <div class="card-footer d-flex justify-content-end">
-          <form action="<?= $URL ?>" method="post">
-            <input type="hidden" id="selected_ids" name="selected_ids" required>
-            <button type="submit" id="btn-integracli" name="btn-integracli" class="btn btn-success btn-sm" value=1 onclick="setSelectedIds()">Integra Clientes</button>
-          </form>
+            </thead>
+            <tbody>
+              <?php foreach ($clientesNaoEncontratdosGi as $item) : //depurar ($item) 
+              ?>
+                <tr>
+                  <td><?= $item['CODFAVOREC'] ?></td>
+                  <td><?= $item['RAZAO'] ?></td>
+                  <td><?= $item['APELIDO'] ?></td>
+                  <td><?= $item['CGCCPF'] ?></td>
+                  <td><?= $item['IERG'] ?></td>
+                  <td><?= "(" . $item['DDD'] . ")" . $item['FONE1'] ?></td>
+                  <td><?= $item['FONE2'] ?></td>
+                  <td><?= strlen(trim($item['EMAIL'])) > 25 ? substr(trim($item['EMAIL']), 0, 25) . '...' : trim($item['EMAIL']) ?></td>
+                  <td><?= trim($item['CODINT']) ?></td>
+                  <td><?= date('d/m/Y', strtotime($item['DTI'])) ?></td>
+                  <td>
+                    <?php if (!empty($item['CGCCPF'])) : ?>
+                      <input type="checkbox" name="selected[]" value='<?= htmlspecialchars(json_encode($item)) ?>'>
+                    <?php else : ?>
+                      &ensp;
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
         </div>
-        <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
-          <thead>
-            <tr class="table-primary">
-              <th scope="col">Código</th>
-              <th scope="col">Nome Cliente</th>
-              <th scope="col">Nome Fantasia/Apelido</th>
-              <th scope="col">Cpf/Cnpj</th>
-              <th scope="col">I.E.</th>
-              <th scope="col">Telefone</th>
-              <th scope="col">Celular</th>
-              <th scope="col">E-Mail</th>
-              <th scope="col">Cod. Ven</th>
-              <th scope="col">Dt. Cadastro</th>
-              <th scope="col"><input type="checkbox" id="selectAll" name="selectAll" onclick="toggleSelectAll(this, this.closest('table'))"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($clientesNaoEncontratdosGi as $item) : //depurar ($item) 
-            ?>
-              <tr>
-                <td><?= $item['CODFAVOREC'] ?></td>
-                <td><?= $item['RAZAO'] ?></td>
-                <td><?= $item['APELIDO'] ?></td>
-                <td><?= $item['CGCCPF'] ?></td>
-                <td><?= $item['IERG'] ?></td>
-                <td><?= "(" . $item['DDD'] . ")" . $item['FONE1'] ?></td>
-                <td><?= $item['FONE2'] ?></td>
-                <td><?= strlen(trim($item['EMAIL'])) > 25 ? substr(trim($item['EMAIL']), 0, 25) . '...' : trim($item['EMAIL']) ?></td>
-                <td><?= trim($item['CODINT']) ?></td>
-                <td><?= date('d/m/Y', strtotime($item['DTI'])) ?></td>
-                <td>
-                  <?php if (!empty($item['CGCCPF'])) : ?>
-                    <input type="checkbox" name="selected[]" value='<?= htmlspecialchars(json_encode($item)) ?>'>
-                  <?php else : ?>
-                    &ensp;
-                  <?php endif; ?>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
       </div>
-    </div>
+      <div class="mb-3"></div>
+    <?php endif; ?>
+    <?php if (!empty($TotalCapt)) : ?>
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-header bg-primary text-white">
+            Clientes Capt Não Integrados: <?= $TotalCapt ?>||
+          </h5>
+          <div class="card-footer d-flex justify-content-end">
+            <form action="<?= $URL ?>" method="post">
+              <input type="hidden" id="selected_ids" name="selected_ids" required>
+              <button type="submit" id="btn-integracli" name="btn-integracli" class="btn btn-success btn-sm" value=1 onclick="setSelectedIds()">Integra Clientes</button>
+            </form>
+          </div>
+          <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
+            <thead>
+              <tr class="table-primary">
+                <th scope="col">Código</th>
+                <th scope="col">Nome Cliente</th>
+                <th scope="col">Nome Fantasia/Apelido</th>
+                <th scope="col">Cpf/Cnpj</th>
+                <th scope="col">I.E.</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">Celular</th>
+                <th scope="col">E-Mail</th>
+                <th scope="col">Cod. Ven</th>
+                <th scope="col">Dt. Cadastro</th>
+                <th scope="col"><input type="checkbox" id="selectAll" name="selectAll" onclick="toggleSelectAll(this, this.closest('table'))"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($clientesNaoEncontratdosCapt as $item) : ?>
+                <tr>
+                  <td><?= $item['codCliente'] ?></td>
+                  <td><?= $item['razaoSocial'] ?></td>
+                  <td><?= $item['nomeFantasia'] ?></td>
+                  <td><?= $item['cpfCnpj'] ?></td>
+                  <td><?= $item['inscrEstadual'] ?></td>
+                  <td><?= "(" . $item['telefoneFixoDDD'] . ")" . $item['telefoneFixoNro'] ?></td>
+                  <td><?= "(" . $item['celularDDD'] . ")" . $item['celularNro'] ?></td>
+                  <td><?= strlen(trim($item['email'])) > 25 ? substr(trim($item['email']), 0, 25) . '...' : trim($item['email']) ?></td>
+                  <td><?= trim($item['codVendedor']) ?></td>
+                  <td><?= date('d/m/Y', strtotime($item['dataCadastro'])) ?></td>
+                  <td><input type="checkbox" name="selected[]" value='<?= htmlspecialchars(json_encode($item)) ?>'></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="mb-3"></div>
+    <?php endif; ?>
+    <div class="mb-3"></div>
+    <?php if (!empty($TotalGestor)) : ?>
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-header bg-primary text-white">
+            Clientes Gestor Não Integrados: <?= $TotalGestor ?>||
+          </h5>
+          <div class="card-footer d-flex justify-content-end">
+            <form action="<?= $URL ?>" method="post">
+              <input type="hidden" id="selected_ids" name="selected_ids" required>
+              <button type="submit" id="btn-integracli" name="btn-integracli" class="btn btn-success btn-sm" value=1 onclick="setSelectedIds()">Integra Clientes</button>
+            </form>
+          </div>
+          <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
+            <thead>
+              <tr class="table-primary">
+                <th scope="col">Código</th>
+                <th scope="col">Nome Cliente</th>
+                <th scope="col">Nome Fantasia/Apelido</th>
+                <th scope="col">Cpf/Cnpj</th>
+                <th scope="col">I.E.</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">Celular</th>
+                <th scope="col">E-Mail</th>
+                <th scope="col">Cod. Ven</th>
+                <th scope="col">Dt. Cadastro</th>
+                <th scope="col"><input type="checkbox" id="selectAll" name="selectAll" onclick="toggleSelectAll(this, this.closest('table'))"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($clientesNaoEncontratdosGestor as $item) : //depurar ($item) 
+              ?>
+                <tr>
+                  <td><?= $item['codigoDaPessoa'] ?></td>
+                  <td><?= $item['nomeRazaoSocial'] ?></td>
+                  <td><?= $item['nomeFantasia'] ?></td>
+                  <td><?= $item['identMF'] ?></td>
+                  <td><?= $item['numeroDoRg'] ?></td>
+                  <td><?= $item['telefone'] ?></td>
+                  <td><?= $item['celular'] ?></td>
+                  <td><?= strlen(trim($item['email'])) > 25 ? substr(trim($item['email']), 0, 25) . '...' : trim($item['email']) ?></td>
+                  <td>&ensp;</td>
+                  <td><?= date('d/m/Y', strtotime($item['dataDeCadastro'])) ?></td>
+                  <td>
+                    <?php if ($item['identMF'] > 0) : ?>
+                      <input type="checkbox" name="selected[]" value='<?= htmlspecialchars(json_encode($item)) ?>'>
+                    <?php else : ?>
+                      &ensp;
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <?php endif; ?>
   </div>
 <?php endif; ?>
 

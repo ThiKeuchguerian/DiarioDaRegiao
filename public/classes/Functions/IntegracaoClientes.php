@@ -7,14 +7,14 @@ class IntegracaoClientes
   private $capt;
   private $senior;
   private $gestor;
-  
+
   public function __construct()
   {
     $this->gi = DatabaseConnection::getConnection('gi');
     $this->capt = DatabaseConnection::getConnection('capt');
-    $this->senior = DatabaseConnection::getConnection('senior');
     $this->gestor = DatabaseConnection::getConnection('gestor');
-    
+    $this->senior = DatabaseConnection::getConnection('senior');
+
     $this->senior->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
   }
   /**
@@ -36,6 +36,47 @@ class IntegracaoClientes
   function limparCpfCnpj($dados)
   {
     return preg_replace('/[^0-9]/', '', $dados);
+  }
+
+  function consultaClientesGi($dados): array
+  {
+    $nomeCli = $dados['nomeCli'] ?? '';
+    $cpfCnpj = $dados['cpfCnpj'] ?? '';
+
+    $sql =
+      "SELECT
+        cli.codfavorec, cli.cgccpf, cli.ierg, cli.razao, cli.apelido, cli.email, cli.emaildest, cli.emailcobranca,
+        cli.ddd, cli.fone1, cli.fone2,
+        cli.endereco, cli.numero, cli.complemento, cli.bairro, cli.cep, cli.cidade, cli.estado,
+        cli.indicacao, cli.ativo, cli.dti,
+        f.codint, f.comisvend, f.comisagen, f.limcredito,
+        con.nome as Contato, con.email as EmailContato
+        FROM fv_end cli
+        inner join fv_favor f on cli.codfavorec = f.codfavorec
+        left outer join fv_cont con on cli.codfavorec = con.codfavorec
+      ";
+
+    $where = [];
+    $params = [];
+
+    if (!empty($cpfCnpj)) {
+      $where[] = "cli.cgccpf = :cpfCnpj";
+      $params[':cpfCnpj'] = $cpfCnpj;
+    }
+    if (!empty($nomeCli)) {
+      $where[] = "cli.razao LIKE :nomeCli";
+      $params[':nomeCli'] = '%' . $nomeCli . '%';
+    }
+
+    if ($where) {
+      $sql .= "\n WHERE " . implode(' AND ', $where);
+    }
+
+    $sql .= "\n ORDER BY cli.razao";
+    $stmt = $this->gi->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
   function consultaClientesCapt($dados): array
@@ -79,42 +120,41 @@ class IntegracaoClientes
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  function consultaClientesGi($dados): array
+  function consultaClientesGestor($dados): array
   {
     $nomeCli = $dados['nomeCli'] ?? '';
     $cpfCnpj = $dados['cpfCnpj'] ?? '';
 
     $sql =
-      "SELECT
-        cli.codfavorec, cli.cgccpf, cli.ierg, cli.razao, cli.apelido, cli.email, cli.emaildest, cli.emailcobranca,
-        cli.ddd, cli.fone1, cli.fone2,
-        cli.endereco, cli.numero, cli.complemento, cli.bairro, cli.cep, cli.cidade, cli.estado,
-        cli.indicacao, cli.ativo, cli.dti,
-        f.codint, f.comisvend, f.comisagen, f.limcredito,
-        con.nome as Contato, con.email as EmailContato
-        FROM fv_end cli
-        inner join fv_favor f on cli.codfavorec = f.codfavorec
-        left outer join fv_cont con on cli.codfavorec = con.codfavorec
+      "SELECT 
+        c.codigoDaPessoa, c.nomeRazaoSocial, c.nomeFantasia, c.identMF, c.numeroDoRg,
+        c.telefone, c.celular,
+        e.siglaTipoLogradouro, e.nomeDoLogradouro, e.numeroDoEndereco, e.cep, e.complementoDoEndereco, e.nomeDoBairro, e.nomeDoMunicipio, e.siglaDaUf,
+        c.email, c.dataDeCadastro
+        FROM vCadPessoaFisicaJuridica c
+        INNER JOIN vCadEnderecoCompleto e WITH (NOLOCK) ON c.codigoDaPessoa = e.codigoDaPessoa
       ";
 
     $where = [];
     $params = [];
 
     if (!empty($cpfCnpj)) {
-      $where[] = "cli.cgccpf = :cpfCnpj";
+      $where[] = "c.identMF = :cpfCnpj";
       $params[':cpfCnpj'] = $cpfCnpj;
     }
     if (!empty($nomeCli)) {
-      $where[] = "cli.razao LIKE :nomeCli";
+      $where[] = "c.nomeRazaoSocial LIKE :nomeCli";
       $params[':nomeCli'] = '%' . $nomeCli . '%';
     }
 
     if ($where) {
       $sql .= "\n WHERE " . implode(' AND ', $where);
+    } else {
+      $sql .= "\n WHERE c.dataDeCadastro > '20250101' ";
     }
 
-    $sql .= "\n ORDER BY cli.razao";
-    $stmt = $this->gi->prepare($sql);
+    $sql .= "\n ORDER BY nomeRazaoSocial, dataDeCadastro DESC";
+    $stmt = $this->gestor->prepare($sql);
     $stmt->execute($params);
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
