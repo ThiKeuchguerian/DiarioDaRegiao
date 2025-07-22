@@ -104,6 +104,12 @@ class DatabaseConnection
           $pass = '605422Q7HwOtr5rP4j';
           break;
 
+        case 'gi':
+          $dsn = "firebird:dbname=10.64.0.35:D:\\GI\\DB\\DIARIO.FDB;charset=UTF8";
+          $user = "sysdba";
+          $pass = "masterkey";
+          break;
+
         default:
           throw new Exception("Conexão '$db' não definida.");
       }
