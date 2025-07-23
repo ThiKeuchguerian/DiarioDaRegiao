@@ -5,5 +5,6 @@
     <div class="mb-3"></div>
     <a href="http://DR13/DistribPontosApoio/distribuicaopontosapoio.aspx/" class="btn btn-primary btn-sm" target="_blank" style="color: white;"> Manutenção Pontos Apoio </a>
     <a href="http://DR11:8088/gestordistribpv/cadpontosvenda.aspx/" class="btn btn-primary btn-sm" target="_blank" style="color: white;"> Manutenção Pontos Vendas </a>
+    <a href="https://entregador-dr.web.app/inicial" class="btn btn-primary btn-sm" target="_blank" style="color: white;"> App Entregadores </a>
   </div>
 </div>
