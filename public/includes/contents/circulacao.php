@@ -5,6 +5,10 @@
     <a href="circulacao/CirConsultaCode.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Código Validação </a>
     <a href="circulacao/CirConsultaCliGestor.php" class="btn btn-primary btn-sm" style="color: white;"> Consulta Cliente Gestor </a>
     <div class="mb-3"></div>
+    <a href="circulacao/CirAssinantesAtivos.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Assinantes Ativos </a>
+    <!-- <a href="RelConAtivos.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Contratos Ativos </a> -->
+    <!-- <a href="RelAssinantes.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Ativos com Dados</a> -->
+    <div class="mb-3"></div>
     <a href="circulacao/CirListaSemVivaMais.php" class="btn btn-primary btn-sm" style="color: white;"> Listagem Sem Viva + </a>
     <div class="mb-3"></div>
     <a href="circulacao/CirVendasEquipe.php" class="btn btn-primary btn-sm" style="color: white;"> Acompanhamento de Vendas/Equipe </a>
@@ -13,10 +17,6 @@
     <a href="circulacao/CirConRecCidade.php" class="btn btn-primary btn-sm" style="color: white;"> Contratos Recebidos Cidade </a>
     <!-- <a href="RelCanEnc.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Contratos Can/Enc </a> -->
     <!-- <a href="RelCanEncSetor.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Can/Enc Setor </a> -->
-    <div class="mb-3"></div>
-    <!-- <a href="RelAssAtivos.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Assinantes Ativos </a> -->
-    <!-- <a href="RelConAtivos.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Contratos Ativos </a> -->
-    <!-- <a href="RelAssinantes.php" class="btn btn-primary btn-sm" style="color: white;"> Relatório Ativos com Dados</a> -->
     <div class="mb-3"></div>
     <!-- <a href="RelacaoAssinantesAtivos.php" class="btn btn-primary btn-sm" style="color: white;">Contratos Ativos - Analítico</a> -->
     <!-- <a href="RelacaoAssinantesCancelados.php" class="btn btn-primary btn-sm" style="color: white;">Contratos Cancelados - Analítico</a> -->
