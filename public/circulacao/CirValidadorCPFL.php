@@ -13,29 +13,49 @@ if (isset($_POST['btn-buscar'])) {
   $dtInicio  = $_POST['DtInicial'];
   $dtFim     = $_POST['DtFinal'];
   $nomeArquivo = $_FILES['arqcpfl']['name'];
-  
+
   $consultaCpfl = $ValidadorCpfl->consultaCPFL($pendentes, $dtInicio, $dtFim, $nomeArquivo);
   $Total = COUNT($consultaCpfl);
 } else if (isset($_POST['btn-processar'])) {
   $dirUp = __DIR__  . '/../uploads/';
-  $arqTmp = $_FILES['arqcpfl']['tmp_name'];
-  $arqOri = $_FILES['arqcpfl']['name'];
-  $nomeArquivo = $arqOri;
-  $nomeOriginal = $dirUp . basename($arqOri);
+  $totalArquivos = count($_FILES['arqcpfl']['name']);
+  $nomesArquivos = [];
+  $arquivosProcessados = [];
 
-  $consultaArq = $ValidadorCpfl->consultaArquivo($nomeArquivo);
-  // depurar($consultaArq);
-  if ($consultaArq > 0) {
-    echo "<script>alert('O arquivo já processado !!!');</script>";
-    // Remove o arquivo da pasta uploads
-    unlink($nomeOriginal);
-  } elseif (move_uploaded_file($arqTmp, $nomeOriginal)) {
-    echo "<script>alert('Upload realizado com sucesso!');</script>";
-    $processarArq = $ValidadorCpfl->processaArq($nomeOriginal, $arqOri);
-    // Remove o arquivo da pasta uploads
-    unlink($nomeOriginal);
+  for ($i = 0; $i < $totalArquivos; $i++) {
+    $arqTmp = $_FILES['arqcpfl']['tmp_name'][$i];
+    $arqOri = $_FILES['arqcpfl']['name'][$i];
+    $erro = $_FILES['arqcpfl']['error'][$i];
+
+    // Verifica se o arquivo foi enviado corretamente
+    if ($erro !== UPLOAD_ERR_OK) {
+      echo "<script>alert('Erro no upload do arquivo: $arqOri');</script>";
+      continue;
+    }
+
+    $nomeOriginal = $dirUp . basename($arqOri);
+    $nomeArquivo = $arqOri;
+    $consultaArq = $ValidadorCpfl->consultaArquivo($nomeArquivo);
+
+    // Adiciona o nome do arquivo ao array
+    $nomesArquivos[] = $arqOri;
+
+    if ($consultaArq > 0) {
+      $arquivosProcessados[] = $arqOri;
+      // Remove o arquivo da pasta uploads (se existir)
+      if (file_exists($nomeOriginal)) {
+        unlink($nomeOriginal);
+      }
+    } elseif (move_uploaded_file($arqTmp, $nomeOriginal)) {
+      // Processa o arquivo
+      $processarArq = $ValidadorCpfl->processaArq($nomeOriginal, $arqOri);
+      // Remove o arquivo após processamento
+      unlink($nomeOriginal);
+    } else {
+      echo "<script>alert('Falha ao mover o arquivo $arqOri.');</script>";
+    }
   }
-
+  $nomeArquivo = $nomesArquivos;
   $consultaCpfl = $ValidadorCpfl->consultaCPFL($pendentes = null, $dtInicio = null, $dtFim = null, $nomeArquivo);
   $Total = COUNT($consultaCpfl);
 }
@@ -80,7 +100,7 @@ require_once __DIR__ . '/../includes/header.php';
               <input type="date" id="DtFinal" name="DtFinal" class="form-control form-control-sm">
             </div>
             <div class="col">
-              <input type="file" class="form-control form-control-sm" id="arqcpfl" name="arqcpfl" accept=".txt">
+              <input type="file" class="form-control form-control-sm" id="arqcpfl" name="arqcpfl[]" accept=".txt" multiple>
             </div>
           </div>
         </div>
@@ -103,10 +123,25 @@ require_once __DIR__ . '/../includes/header.php';
 <!-- Exibindo Resultado -->
 <?php if (!empty($Total)) : ?>
   <div class="container">
+    <?php if (isset($arquivosProcessados)) : ?>
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-header bg-primary text-white">
+            Arquivos Já Processados:<br>
+            <?= implode('<br>', $arquivosProcessados) ?>
+          </h5>
+        </div>
+      </div>
+    <?php endif; ?>
+    <div class="mb-2"></div>
     <div class="card shadow-sm h-100">
       <div class="card-body">
         <h5 class="card-header bg-primary text-white">
-          Qtde. Total: <?= $Total ?> || <?= date("d/m/Y", strtotime($dtInicio))  ?> à <?= date("d/m/Y", strtotime($dtFim)) ?>
+          <?php if (is_null($dtInicio) || $dtInicio === ''): ?>
+            Qtde. Total: <?= $Total ?>
+          <?php else: ?>
+            Qtde. Total: <?= $Total ?> || <?= date("d/m/Y", strtotime($dtInicio))  ?> à <?= date("d/m/Y", strtotime($dtFim)) ?>
+          <?php endif; ?>
         </h5>
         <table class="table table-striped table-hover mb-0" id="Resultado" name="Resultado">
           <thead>

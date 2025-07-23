@@ -110,7 +110,7 @@ class ValidadorCpfl
     ?int    $pendentes   = null,
     ?string $dtInicio    = null,
     ?string $dtFim       = null,
-    ?string $nomeArquivo = null
+    ?array  $nomeArquivo = null
   ): array {
     // Converter as datas para o formato YYYYMMDD
     $dtInicio = str_replace('-', '', $dtInicio);
@@ -139,9 +139,12 @@ class ValidadorCpfl
     $params = [];
 
     // Filtro por nome do arquivo
-    if($nomeArquivo){
-      $where[]            = 'CPFL.nomeDoArquivo = :nomeArq';
-      $params[':nomeArq'] = $nomeArquivo;
+    if ($nomeArquivo && is_array($nomeArquivo)) {
+      $arquivos = array_map(function ($arq) {
+        return "'" . addslashes($arq) . "'";
+      }, $nomeArquivo);
+      $arquivosStr = implode(',', $arquivos);
+      $where[] = "CPFL.nomeDoArquivo IN ($arquivosStr)";
     }
     // filtro por intervalo de geração
     if ($dtInicio && $dtFim) {
