@@ -157,6 +157,7 @@ class AssinantesAtivos
       $sql .= "\n WHERE " . implode(" AND ", $where);
     } else {
       $sql .= "\n WHERE Con.situacaoDoContrato IN (1,3) ";
+      $sql .= "\n AND Con.dataDeValidadeInicial >= GETDATE() AND Con.dataDeValidadeFinal <= GETDATE()";
     }
 
     $sql .= "\n ORDER BY Con.dataDaAssinatura, Pes.nomeRazaoSocial, Con.numeroDoContrato";
