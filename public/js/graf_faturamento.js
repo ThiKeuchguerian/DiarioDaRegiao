@@ -108,53 +108,7 @@ $(document).ready(function () {
       alert("Filtro inválido. Por favor selecione pelo menos Data Inicial");
     }
   });
-  // Captura o botão de impressão pelo ID
-  const btnImprimir = document.getElementById("btn-imprimir");
-
-  // Adiciona um ouvinte de evento de clique ao botão de impressão
-  btnImprimir.addEventListener("click", function () {
-    // Oculta a tabela Filtro antes de imprimir
-    document.querySelector('.filter-fields').style.display = 'none';
-
-    // Oculta as colunas e linhas indesejadas antes de imprimir
-    const columnsToHide = [15, 16];
-    const rowsToHide = document.querySelectorAll('tr:has(th[colspan="10"]), tr:has(button[name="btn-faturado"]), tr:has(button[name="btn-duplicate"])');
-
-    columnsToHide.forEach(index => {
-      document.querySelectorAll(`td:nth-child(${index}), th:nth-child(${index})`).forEach(cell => {
-        cell.style.display = 'none';
-      });
-    });
-
-    rowsToHide.forEach(row => {
-      row.style.display = 'none';
-    });
-    // Define o formato de impressão para paisagem com margem mínima
-    const style = document.createElement('style');
-    style.innerHTML = '@page { size: landscape; margin: 2.5mm; } body { font-size: 12px; margin: 2.5mm; }';
-    document.head.appendChild(style);
-
-    // Abre a janela de impressão do navegador
-    window.print();
-
-    // Restaura a exibição das colunas e linhas após a impressão
-    columnsToHide.forEach(index => {
-      document.querySelectorAll(`td:nth-child(${index}), th:nth-child(${index})`).forEach(cell => {
-        cell.style.display = '';
-      });
-    });
-
-    rowsToHide.forEach(row => {
-      row.style.display = '';
-    });
-
-    // Restaura a exibição da tabela Filtro após a impressão
-    document.querySelector('.filter-fields').style.display = 'block';
-
-    // Remove o estilo de impressão após a impressão
-    document.head.removeChild(style);
-  });
-
+  
   // Formata o Campo do Modal editDataRodagem
   $('#editDataRodagem').on('input', function () {
     var input = $(this).val();

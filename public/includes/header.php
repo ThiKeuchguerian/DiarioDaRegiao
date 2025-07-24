@@ -78,34 +78,72 @@
 
     @media print {
 
-      table,
-      tr,
+      /* Se quiser paisagem e controle de margem fina */
+      @page {
+        size: A4 landscape;
+        margin-top: 75px;
+        margin: 10mm 10mm 10mm 10mm !important;
+        /* top | right | bottom | left */
+        /* ou 0 para sem margem, se a impressora/driver permitir */
+      }
+
+      /* Zera margens/paddings do html/body */
+      html,
+      body {
+        margin: 5px 5px 5px 5px  !important;
+        padding: 0 !important;
+        width: 100%;
+        height: 100%;
+        /* força usar toda a página */
+      }
+
+      /* Anula o container do Bootstrap */
+      .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      /* Faz sua tabela ocupar 100% de largura também */
+      table {
+        width: 100% !important;
+        margin: 0 !important;
+        /* page-break-inside: avoid; */
+      }
+
+      /* Ajusta células e cabeçalhos */
       th,
       td {
-        font-size: 10px;
+        padding: 3px !important;
+        /* reduza conforme precisar */
       }
 
-      h5 {
-        font-size: 12px;
+      /* Caso você tenha um wrapper extra */
+      #relatorio,
+      .relatorio-wrapper {
+        width: 100% !important;
+        margin: 0mm !important;
+        padding: 0mm !important;
       }
 
-      /* Esconde o menu de filtro de busca; substitua ".menu-filtro" pelo seletor correto */
-      .menu-filtro {
+      /* Remove elementos indesejados */
+      #header,
+      #footer,
+      .filter-fields,
+      .form, .navbar,
+      .no-print {
         display: none !important;
       }
 
-
-      /* Margens mínimas para a página de impressão */
-      @page {
-        size: landscape;
-        /* Define paisagem */
-        margin: 2.5mm;
-        /* Define margens mínimas de 10mm em todos os lados */
+      /* Remove os URLs dos links impressos */
+      a[href]:after {
+        content: none !important;
       }
     }
 
     li {
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .content-only {

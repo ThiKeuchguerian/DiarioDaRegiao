@@ -248,7 +248,7 @@ require_once __DIR__ . '/../includes/header.php';
             <button id="btn-relatorio" name="btn-relatorio" type="submit" class="btn btn-primary btn-sm">Relatório</button>
             <button id="btn-incluir" name="btn-incluir" type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#IncluirModal">Incluir</button>
             <button id="btn-exportar" name="btn-exportar" type="submit" class="btn btn-success btn-sm">Exportar</button>
-            <button id="btn-imprimir" name="btn-imprimir" type="submit" class="btn btn-primary btn-sm">Imprimir</button>
+            <button id="btn-imprimir" name="btn-imprimir" type="button" onclick="window.print()" class="btn btn-primary btn-sm">Imprimir</button>
             <a class="btn btn-primary btn-sm" href="<?= URL_PRINCIPAL ?>">Voltar</a>
           </div>
         </div>
@@ -281,12 +281,12 @@ require_once __DIR__ . '/../includes/header.php';
                 <th scope="col">Papel</th>
                 <th scope="col">Qtde. Cor</th>
                 <th scope="col">Tiragem</th>
-                <th scope="col">Valor</th>
-                <th scope="col">Faturado</th>
-                <th scope="col">NumPed</th>
-                <th scope="col">PedCli</th>
-                <th scope="col">Obs.</th>
-                <th scope="col" colspan="2">Ações</th>
+                <th scope="col" class="no-print">Valor</th>
+                <th scope="col" class="no-print">Faturado</th>
+                <th scope="col" class="no-print">NumPed</th>
+                <th scope="col" class="no-print">PedCli</th>
+                <th scope="col" class="no-print">Obs.</th>
+                <th scope="col" colspan="2" class="no-print">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -301,20 +301,20 @@ require_once __DIR__ . '/../includes/header.php';
                   <td><?= $item['Papel'] ?></td>
                   <td><?= $item['QtdeCor'] ?></td>
                   <td style="text-align: right;"><?= $item['Tiragem'] !== '' ? number_format($item['Tiragem'], 0, ',', '.') : '' ?></td>
-                  <td style="text-align: right; <?= $item['Valor'] < 0 ? 'color: red; font-weight: bold;' : '' ?>; white-space: nowrap;">
+                  <td class="no-print" style="text-align: right; <?= $item['Valor'] < 0 ? 'color: red; font-weight: bold;' : '' ?>; white-space: nowrap;">
                     <span style="float: left;">R$</span>
                     <?= number_format(floatval($item['Valor']), 2, ',', '.'); ?>
                   </td>
-                  <td class="text-center"><?= $item['Faturado'] ?></td>
-                  <td><?= $item['NumPedido'] ?></td>
-                  <td><?= $item['NumPedCli'] ?></td>
-                  <td title="<?= $item['Obs'] ?>"><?= mb_strimwidth($item['Obs'], 0, 20, '...') ?></td>
-                  <td class="text-center align-middle"><input type="checkbox" name="selected[]" value="<?= $item['ID'] ?>"></td>
-                  <td><button class="btn btn-primary btn-sm" onclick="openEditModal(<?= htmlspecialchars(json_encode($item)) ?>)">Editar</button></td>
+                  <td class="text-center no-print"><?= $item['Faturado'] ?></td>
+                  <td class="no-print"><?= $item['NumPedido'] ?></td>
+                  <td class="no-print"><?= $item['NumPedCli'] ?></td>
+                  <td class="no-print" title="<?= $item['Obs'] ?>"><?= mb_strimwidth($item['Obs'], 0, 20, '...') ?></td>
+                  <td class="text-center align-middle no-print"><input type="checkbox" name="selected[]" value="<?= $item['ID'] ?>"></td>
+                  <td class="no-print"><button class="btn btn-primary btn-sm" onclick="openEditModal(<?= htmlspecialchars(json_encode($item)) ?>)">Editar</button></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
-            <tbody>
+            <tbody class="no-print">
               <tr>
                 <th colspan="9" style="text-align: right;">Valor Total:</th>
                 <th style="text-align: right; white-space: nowrap;">
@@ -324,7 +324,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <th colspan="7" style="text-align: right;"></th>
               </tr>
             </tbody>
-            <tbody>
+            <tbody class="no-print">
               <td colspan="16" style="text-align: right;">
                 <form action="<?= $URL ?>" id="Altera" name="Altera" method="post" style="display:inline;" onsubmit="return validateForm(event);">
                   <input type="hidden" id="selected_ids" name="selected_ids" required>
