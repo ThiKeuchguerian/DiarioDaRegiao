@@ -85,7 +85,7 @@ require_once __DIR__ . '/../includes/header.php';
   <div class="container">
     <div class="card shadow-sm">
       <h5 class="card-header bg-primary text-white">
-        <?= $dados ?> Edições do <?= $nameProd ?> no Ano <?= $ano ?>
+        <?= $dados ?> Edições do <?= $nameProd ?> no Ano <?= $year ?>
       </h5>
       <div class="card-body d-flex flex-column">
         <div class="row row-cols row-cols-md-4 g-2">
