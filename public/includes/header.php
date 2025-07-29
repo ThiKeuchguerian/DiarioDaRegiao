@@ -90,7 +90,7 @@
       /* Zera margens/paddings do html/body */
       html,
       body {
-        margin: 5px 5px 5px 5px  !important;
+        margin: 5px 5px 5px 5px !important;
         padding: 0 !important;
         width: 100%;
         height: 100%;
@@ -131,7 +131,8 @@
       #header,
       #footer,
       .filter-fields,
-      .form, .navbar,
+      .form,
+      .navbar,
       .no-print {
         display: none !important;
       }
@@ -277,6 +278,11 @@
 
     canvas {
       max-width: 800px;
+    }
+
+    .descricao {
+      font-size: 0.65rem;
+      color: #aaa;
     }
   </style>
 </head>
