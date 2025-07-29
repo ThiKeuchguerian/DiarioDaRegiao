@@ -8,7 +8,7 @@ class GraficaProducao
 
   public function __construct()
   {
-    $this->gdc = DatabaseConnection::getConnection('gdcTeste');
+    $this->gdc = DatabaseConnection::getConnection('gdc');
     $this->senior = DatabaseConnection::getConnection('senior');
   }
 
