@@ -115,7 +115,7 @@
       /* Ajusta células e cabeçalhos */
       th,
       td {
-        padding: 3px !important;
+        padding: 2px !important;
         /* reduza conforme precisar */
       }
 
@@ -164,12 +164,13 @@
       border-radius: 10px;
     }
 
-    th {
+    th,
+    td {
       font-size: 11px;
     }
 
-    td {
-      font-size: 11px;
+    table {
+      border-collapse: collapse;
     }
 
     form,
