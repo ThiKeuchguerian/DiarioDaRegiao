@@ -12,6 +12,6 @@
     <a href="grafica/GrafProducao.php" class="btn btn-primary btn-sm" style="color: white;">Produção Gráfica</a>
     <a href="grafica/GrafFreteArte.php" class="btn btn-primary btn-sm" style="color: white;">Relatório Frete & Arte</a>
     <div class="mb-3"></div>
-    <!-- <a href="grafica/GrafConsultaQtdeEst.php" class="btn btn-primary btn-sm" style="color: white;">Consulta Qtde. estoque</a> -->
+    <a href="grafica/GrafConsultaEstq.php" class="btn btn-primary btn-sm" style="color: white;">Consulta Qtde. estoque</a>
   </div>
 </div>
