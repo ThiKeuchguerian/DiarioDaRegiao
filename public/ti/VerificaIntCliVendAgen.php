@@ -22,11 +22,14 @@ $DadosVendSenior    = [];
 if (isset($_POST['BuscarCli'])) {
   $cpfCnpj        = $_POST['CPFCNPJ'];
 
+  $dadosGi        = $IntegracaoCliVendAg->ClienteGi($cpfCnpj)               ?: [];
   $dadosCapt      = $IntegracaoCliVendAg->ClienteCapt($cpfCnpj)             ?: [];
   $dadosSenior    = $IntegracaoCliVendAg->ClienteSenior($cpfCnpj)           ?: [];
   $dadosSeniorIn  = $IntegracaoCliVendAg->ClienteSeniorInt($cpfCnpj)        ?: [];
   $dadosEasyclass = $IntegracaoCliVendAg->ClienteEasyClass($cpfCnpj)        ?: [];
   $dadosGrafica   = $IntegracaoCliVendAg->ClienteOrcamentoGrafica($cpfCnpj) ?: [];
+  // depurar($cpfCnpj, $dadosGi);
+  $Total = count($dadosGi) + count($dadosCapt) + count($dadosSenior) + count($dadosSeniorIn) + count($dadosEasyclass) + count($dadosGrafica);
 } elseif (isset($_POST['BuscarAg'])) {
   $cpfCnpj = $_POST['CNPJAgen'];
 
@@ -35,6 +38,7 @@ if (isset($_POST['BuscarCli'])) {
 } elseif (isset($_POST['BuscarVend'])) {
   $nome = $_POST['NomeVend'];
 
+  $DadosVendGi     = $IntegracaoCliVendAg->VendedorGi($nome)     ?: [];
   $DadosVendCapt   = $IntegracaoCliVendAg->VendedorCapt($nome)   ?: [];
   $DadosVendSenior = $IntegracaoCliVendAg->VendedorSenior($nome) ?: [];
 } elseif (isset($_POST['BtnSalvarCli'])) {
@@ -211,7 +215,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="mb-3"></div>
 
 <!-- Resultado Cliente -->
-<?php if (count($dadosCapt) + count($dadosSenior) + count($dadosSeniorIn) + count($dadosEasyclass) + count($dadosGrafica) > 0): ?>
+<?php if (isset($Total)) : ?>
   <div class="container">
     <div class="row">
       <div class="col">
@@ -239,6 +243,7 @@ require_once __DIR__ . '/../includes/header.php';
                   (array)$dadosSenior,
                   (array)$dadosSeniorIn,
                   (array)$dadosEasyclass,
+                  (array)$dadosGi,
                   (array)$dadosGrafica
                 );
                 foreach ($todos as $item):
@@ -246,7 +251,7 @@ require_once __DIR__ . '/../includes/header.php';
                   <tr>
                     <td><?= htmlspecialchars($item['Sistema'] ?? '—') ?></td>
                     <td style="text-align: center;"><?= ($item['ID'] ?? '—') ?></td>
-                    <td style="text-align: center;"><?= ($item['CodCliente'] ?? '—') ?></td>
+                    <td style="text-align: center;"><?= ($item['CodCliente'] ?? '-') ?></td>
                     <td><?= htmlspecialchars($item['NomeCliente'] ?? '—') ?></td>
                     <td><?= ($item['CpfCnpj'] ?? '—') ?></td>
                     <td style="text-align: center;"><?= ($item['Tipo'] ?? '—') ?></td>
@@ -317,6 +322,17 @@ require_once __DIR__ . '/../includes/header.php';
                     <td><?= $item['nomrep'] ?></td>
                     <td><?= $item['cgccpf'] ?></td>
                     <td><?= $item['sitrep'] ?></td>
+                  </tr>
+                <?php endforeach; ?>
+                <?php foreach ($DadosVendGi as $item) : ?>
+                  <tr>
+                    <td><?= $item['Sistema'] ?></td>
+                    <td><?= $item['ID'] ?></td>
+                    <td><?= $item['codrep'] ?></td>
+                    <td><?= $item['codcdi'] ?></td>
+                    <td><?= $item['nomrep'] ?></td>
+                    <td><?= $item['CpfCnpj'] ?></td>
+                    <td><?= $item['ativo'] ?></td>
                   </tr>
                 <?php endforeach; ?>
               </tbody>

@@ -3,14 +3,16 @@ require_once __DIR__ . '/../DBConnect.php';
 
 class IntegracaoCliVendAg
 {
-  private $senior;
+  private $gi;
   private $capt;
+  private $senior;
   private $tecmidia;
 
   public function __construct()
   {
-    $this->senior   = DatabaseConnection::getConnection('senior');
+    $this->gi       = DatabaseConnection::getConnection('gi');
     $this->capt     = DatabaseConnection::getConnection('capt');
+    $this->senior   = DatabaseConnection::getConnection('senior');
     $this->tecmidia = DatabaseConnection::getConnection('tecmidia');
 
     $this->senior->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
@@ -28,11 +30,15 @@ class IntegracaoCliVendAg
     foreach ($params as $ph => $val) {
       $stmt->bindValue($ph, $val, \PDO::PARAM_STR);
     }
-    // echo "<pre>";
-    // var_dump($val);
-    // die();
+
     $stmt->execute();
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+  }
+  function limparCpfCnpj($cpfCnpj)
+  {
+    $numeros = preg_replace('/[^0-9]/', '', $cpfCnpj);
+
+    return ltrim($numeros, 0);
   }
   /**
    * Prepara, faz bindValue e executa um SQL de atualização
@@ -44,13 +50,11 @@ class IntegracaoCliVendAg
     foreach ($params as $ph => $val) {
       $stmt->bindValue($ph, $val, \PDO::PARAM_STR);
     }
-    // echo "<pre>";
-    // var_dump($stmt);
-    // var_dump($params);
-    // die();
+
     $stmt->execute();
     return $stmt->rowCount();
   }
+
   function ClienteCapt(string $cpfCnpj): array
   {
     $sql = "SELECT Sistema='Capt', c.idCliente AS ID, c.codCliente AS CodCliente, c.razaoSocial AS NomeCliente, c.cpfCnpj AS CpfCnpj, c.codVendedor AS CodVendedor,
@@ -61,10 +65,6 @@ class IntegracaoCliVendAg
       WHERE c.cpfCnpj LIKE :cpfCnpj 
     ";
 
-    // echo "<pre>";
-    // var_dump($sql);
-    // die();
-
     return $this->runQuery($this->capt, $sql, [
       ':cpfCnpj' => $cpfCnpj . '%'
     ]);
@@ -72,19 +72,18 @@ class IntegracaoCliVendAg
 
   function ClienteSenior(string $cpfCnpj): array
   {
-    $sql = "SELECT Sistema='Sapiens', c.codcli AS ID, c.idecli AS CodCliente, c.nomcli AS NomeCliente, c.cgccpf AS CpfCnpj, c.apecli, 
-      CASE 
-        WHEN c.tipcli = 'F' THEN 'Física'
-        WHEN c.tipcli = 'J' THEN 'Jurídica'
-      END AS Tipo
-      FROM e085cli c
-      WHERE c.cgccpf LIKE :cpfCnpj
-    ";
-
-    // echo "<pre>";
-    // var_dump($sql);
-    // die();
-
+    $cpfCnpj = $this->limparCpfCnpj($cpfCnpj);
+    $sql =
+      "SELECT Sistema='Sapiens', c.codcli AS ID, c.idecli AS CodCliente, c.nomcli AS NomeCliente, c.cgccpf AS CpfCnpj, c.apecli, 
+        CodVendedor = '',
+        CASE 
+          WHEN c.tipcli = 'F' THEN 'Física'
+          WHEN c.tipcli = 'J' THEN 'Jurídica'
+        END AS Tipo
+        FROM e085cli c
+        WHERE c.cgccpf LIKE :cpfCnpj
+      ";
+      
     return $this->runQuery($this->senior, $sql, [
       ':cpfCnpj' => $cpfCnpj . '%'
     ]);
@@ -92,18 +91,17 @@ class IntegracaoCliVendAg
 
   function ClienteSeniorInt(string $cpfCnpj): array
   {
-    $sql = "SELECT Sistema='SapiensIntegracao', intc.usu_codcli AS ID, intc.usu_zr_cod AS CodCliente, intc.usu_zr_codvend AS CodVendedor, intc.usu_zr_desc AS NomeCliente, intc.usu_zr_cgc AS CpfCnpj,
-      CASE
-        WHEN LEN(intc.usu_zr_cgc) = 11 THEN 'Física'
-        WHEN LEN(intc.usu_zr_cgc) = 14 THEN 'Jurídica'
-      END AS Tipo FROM usu_tszr010 intc
-      WHERE intc.usu_zr_dtgera = (SELECT MAX(intc.usu_zr_dtgera) FROM usu_tszr010 intc WHERE intc.usu_zr_cgc = :cpfCnpj )
-        AND  intc.usu_zr_cgc LIKE :cpfCnpj
-    ";
-
-    // echo "<pre>";
-    // var_dump($sql, $cpfCnpj);
-    // die();
+    $cpfCnpj = $this->limparCpfCnpj($cpfCnpj);
+    $sql =
+      "SELECT Sistema='SapiensIntegracao', intc.usu_codcli AS ID, intc.usu_zr_cod AS CodCliente, intc.usu_zr_codvend AS CodVendedor, 
+        intc.usu_zr_desc AS NomeCliente, intc.usu_zr_cgc AS CpfCnpj,
+        CASE
+          WHEN LEN(intc.usu_zr_cgc) = 11 THEN 'Física'
+          WHEN LEN(intc.usu_zr_cgc) = 14 THEN 'Jurídica'
+        END AS Tipo FROM usu_tszr010 intc
+        WHERE intc.usu_zr_dtgera = (SELECT MAX(intc.usu_zr_dtgera) FROM usu_tszr010 intc WHERE intc.usu_zr_cgc = :cpfCnpj )
+          AND  intc.usu_zr_cgc LIKE :cpfCnpj
+      ";
 
     return $this->runQuery($this->senior, $sql, [
       ':cpfCnpj' => $cpfCnpj . '%'
@@ -112,19 +110,17 @@ class IntegracaoCliVendAg
 
   function ClienteOrcamentoGrafica(string $cpfCnpj): array
   {
-    $sql = "SELECT	Sistema = 'Grafica', codcli AS ID, idecli AS CodCliente, CAST(cgccpf AS VARCHAR) CpfCnpj, nomcli NomeCliente, apecli NOME_FANTASIA,
-      CASE
-        WHEN LEN(cgccpf) = 11 THEN 'Física'
-        WHEN LEN(cgccpf) = 14 THEN 'Jurídica'
-      END AS Tipo
-      FROM	e085cli WITH (NOLOCK)
-        WHERE	sitcli = 'A' AND ISNUMERIC(idecli) = 1 and cgccpf LIKE :cpfCnpj 
-      ORDER	BY nomcli, apecli 
-    ";
-
-    // echo "<pre>";
-    // var_dump($sql, $cpfCnpj);
-    // die();
+    $sql =
+      "SELECT	Sistema = 'Grafica', codcli AS ID, idecli AS CodCliente, cgccpf AS CpfCnpj, nomcli NomeCliente,
+        CodVendedor = '',
+        CASE
+          WHEN LEN(cgccpf) = 11 THEN 'Física'
+          WHEN LEN(cgccpf) = 14 THEN 'Jurídica'
+        END AS Tipo
+        FROM	e085cli WITH (NOLOCK)
+          WHERE	sitcli = 'A' AND ISNUMERIC(idecli) = 1 and cgccpf LIKE :cpfCnpj 
+        ORDER	BY nomcli, apecli 
+      ";
 
     return $this->runQuery($this->senior, $sql, [
       ':cpfCnpj' => $cpfCnpj . '%'
@@ -133,17 +129,61 @@ class IntegracaoCliVendAg
 
   function ClienteEasyClass(string $cpfCnpj): array
   {
-    $sql = "SELECT Sistema='EasyClass', c.customer_id AS ID, c.customer_id AS CodCliente, c.fullname AS NomeCliente, c.id_value AS CpfCnpj, c.id_type,
-      CASE 
-        WHEN c.id_type = '0' THEN 'Física'
-        WHEN c.id_type = '1' THEN 'Jurídica'
-      END AS Tipo FROM ec_customer c
-      WHERE c.id_value LIKE :cpfCnpj 
-    ";
+    $sql =
+      "SELECT Sistema = 'EasyClass', c.customer_id AS ID, c.customer_id AS CodCliente, c.fullname AS NomeCliente, c.id_value AS CpfCnpj,
+        CodVendedor = '',
+        CASE 
+          WHEN c.id_type = '0' THEN 'Física'
+          WHEN c.id_type = '1' THEN 'Jurídica'
+        END AS Tipo FROM ec_customer c
+        WHERE c.id_value LIKE :cpfCnpj 
+      ";
 
     return $this->runQuery($this->tecmidia, $sql, [
       ':cpfCnpj' => $cpfCnpj . '%'
     ]);
+  }
+
+  function ClienteGi(string $cpfCnpj): array
+  {
+    $sql =
+      'SELECT 
+          \'Gi\' AS "Sistema",
+          cli.codfavorec AS "ID",
+          cli.razao AS "NomeCliente",
+          cli.cgccpf AS "CpfCnpj",
+          CASE 
+            WHEN f.pjpf = \'J\' THEN \'Jurídica\'
+            WHEN f.pjpf = \'F\' THEN \'Física\'
+            ELSE \'Física\'
+          END AS "Tipo",
+          cli.email,
+          cli.emaildest,
+          cli.emailcobranca,
+          cli.codven AS "CodVendedor",
+          con.nome AS "Contato",
+          con.email AS "EmailContato"
+        FROM fv_end cli
+        INNER JOIN fv_favor f ON cli.codfavorec = f.codfavorec
+        LEFT OUTER JOIN fv_cont con ON cli.codfavorec = con.codfavorec
+      ';
+
+    $where = [];
+    $params = [];
+
+    if (!empty($cpfCnpj)) {
+      $where[] = "REPLACE(REPLACE(REPLACE(REPLACE(cli.cgccpf, '.', ''),'-', ''),'/', ''),' ', '') LIKE :cpfCnpj";
+      $params[':cpfCnpj'] = $cpfCnpj . '%';
+    }
+
+    if (count($where) > '0') {
+      $sql .= "\n WHERE " . implode(" AND ", $where);
+    }
+
+    $stmt = $this->gi->prepare($sql);
+    $stmt->execute($params);
+
+    return $this->runQuery($this->gi, $sql, $params);
   }
 
   function VendedorCapt(string $nome): array
@@ -167,6 +207,39 @@ class IntegracaoCliVendAg
     return $this->runQuery($this->senior, $sql, [
       ':NomeVend' => $nome . '%'
     ]);
+  }
+
+  function VendedorGi(string $nome): array
+  {
+    $sql =
+      'SELECT 
+          \'Gi\' AS "Sistema",
+          cli.codfavorec AS "ID",
+          f.codext AS "codrep",
+          cli.razao AS "nomrep",
+          cli.cgccpf AS "CpfCnpj",
+          \'\' AS "codcdi",
+          f.ativo AS "ativo"
+        FROM fv_end cli
+        INNER JOIN fv_favor f ON cli.codfavorec = f.codfavorec
+      ';
+
+    $where = [];
+    $params = [];
+
+    if (!empty($nome)) {
+      $where[] = "cli.razao LIKE UPPER(:nome)";
+      $params[':nome'] = $nome . '%';
+    }
+
+    if (count($where) > '0') {
+      $sql .= "\n WHERE " . implode(" AND ", $where);
+    }
+
+    $stmt = $this->gi->prepare($sql);
+    $stmt->execute($params);
+
+    return $this->runQuery($this->gi, $sql, $params);
   }
 
   function AgenciaCapt(string $cpfCnpj): array
@@ -198,7 +271,7 @@ class IntegracaoCliVendAg
     string $codCliente,
     ?string $tipoCliente = null,
     ?string $codVendedor = null
-    ): int {
+  ): int {
     switch ($sistema) {
       case 'Capt':
         $conn   = $this->capt;
