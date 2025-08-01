@@ -110,6 +110,12 @@ class DatabaseConnection
           $pass = "masterkey";
           break;
 
+        case 'giTeste':
+          $dsn = "firebird:dbname=10.64.0.35:D:\\GI\\DB\\TESTE.FDB;charset=UTF8";
+          $user = "sysdba";
+          $pass = "masterkey";
+          break;
+
         default:
           throw new Exception("Conexão '$db' não definida.");
       }
